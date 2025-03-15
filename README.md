@@ -2,7 +2,7 @@
 
 This repository provides Terraform configurations and automation scripts for deploying an ELT pipeline infrastructure on **OCI** and **Azure**. It includes:
 - **Databricks** for data processing
-- **Apache Airflow** or **Azure Data Factory** for workflow orchestration
+- **Apache Airflow** (for OCI) or **Azure Data Factory** (for Azure) for workflow orchestration
 - **Python ingestion scripts** for fetching data from external sources
 - **dbt models** for transformation
 
@@ -38,27 +38,33 @@ README.md
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/janahlin/cloud-elt-infra.git
+   git clone https://github.com/YOUR_USERNAME/cloud-elt-infra.git
    ```
 
 2. Install Terraform and authenticate to your cloud provider.
 
-3. Choose the deployment environment (OCI or Azure) and configure `terraform.tfvars`.
-
-4. Apply Terraform:
+3. Run Terraform initialization:
    ```sh
    terraform init
-   terraform apply -var-file=terraform.tfvars
    ```
 
-5. Run ingestion scripts and dbt transformations as needed.
+4. Apply Terraform interactively:
+   ```sh
+   terraform apply
+   ```
+   You will be prompted to select:
+   - **Cloud Provider** (`oci` or `azure`)
+   - **Deployment Environment** (`dev`, `staging`, `production`)
+
+5. The ELT tool is automatically chosen based on the cloud provider:
+   - If **Azure** is selected → **Azure Data Factory** is used
+   - If **OCI** is selected → **Apache Airflow** is used
+
+6. Run ingestion scripts and dbt transformations as needed.
 
 ## 🔧 Configuration
 
-Modify `terraform.tfvars` based on your cloud provider and ELT tool selection.
-
-- To use **Airflow**, set `use_airflow = true`
-- To use **Azure Data Factory**, set `use_airflow = false`
+Modify `terraform.tfvars` (optional) if you want to **predefine the values** instead of interactive input.
 
 ## 📜 License
 
