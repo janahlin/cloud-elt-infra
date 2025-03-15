@@ -38,7 +38,7 @@ README.md
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/YOUR_USERNAME/cloud-elt-infra.git
+   git clone https://github.com/janahlin/cloud-elt-infra.git
    ```
 
 2. Install Terraform and authenticate to your cloud provider.
