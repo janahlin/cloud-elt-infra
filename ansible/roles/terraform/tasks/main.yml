@@ -1,0 +1,17 @@
+---
+- name: Add HashiCorp GPG key
+  apt_key:
+    url: https://apt.releases.hashicorp.com/gpg
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Add HashiCorp repository
+  apt_repository:
+    repo: "deb [arch=amd64] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main"
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Install Terraform
+  package:
+    name: terraform
+    state: present

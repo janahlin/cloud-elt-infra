@@ -1,0 +1,23 @@
+---
+- name: Install common dependencies
+  package:
+    name:
+      - git
+      - unzip
+      - wget
+      - curl
+      - jq
+      - python3-pip
+    state: present
+
+- name: Create workspace directory
+  file:
+    path: "/opt/cloud-elt-infra"
+    state: directory
+    mode: '0755'
+
+- name: Clone cloud-elt-infra repository
+  git:
+    repo: "https://github.com/YOUR_USERNAME/cloud-elt-infra.git"
+    dest: "/opt/cloud-elt-infra"
+    version: "main"

@@ -1,0 +1,6 @@
+azure-cli
+azure-mgmt-resource
+azure-identity
+oci
+pyyaml
+jinja2

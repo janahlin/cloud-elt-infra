@@ -1,0 +1,15 @@
+---
+- name: Setup Controller VM
+  hosts: controller
+  become: yes
+  vars:
+    cloud_provider: "{{ cloud_provider | default('azure') }}"
+  roles:
+    - common
+    - terraform
+    - python_tools
+    - controller_setup
+    - role: azure_tools
+      when: cloud_provider == "azure"
+    - role: oci_tools
+      when: cloud_provider == "oci"

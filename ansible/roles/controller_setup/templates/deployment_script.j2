@@ -1,0 +1,32 @@
+#!/bin/bash
+set -e
+
+# Deployment script for Cloud ELT Infrastructure
+cd /opt/cloud-elt-infra/terraform
+
+# Check if tfvars file exists
+if [ ! -f "terraform.tfvars" ]; then
+  echo "Creating terraform.tfvars from example file..."
+  cp terraform.tfvars.example terraform.tfvars
+  echo "Please edit terraform.tfvars with your specific values before deploying."
+  exit 1
+fi
+
+# Initialize Terraform
+echo "Initializing Terraform..."
+terraform init
+
+# Plan the deployment
+echo "Planning Terraform deployment..."
+terraform plan -out=tfplan
+
+# Ask for confirmation
+read -p "Do you want to apply the plan? (y/n): " confirm
+if [[ $confirm == "y" || $confirm == "Y" ]]; then
+  echo "Applying Terraform plan..."
+  terraform apply tfplan
+  
+  echo "Deployment complete!"
+else
+  echo "Deployment canceled."
+fi

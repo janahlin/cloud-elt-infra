@@ -1,0 +1,22 @@
+---
+- name: Install Azure CLI
+  shell: curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+  args:
+    creates: /usr/bin/az
+  when: ansible_os_family == "Debian"
+
+- name: Create .azure directory
+  file:
+    path: "/home/{{ ansible_user }}/.azure"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0700'
+
+- name: Template Azure credentials file
+  template:
+    src: azure_credentials.j2
+    dest: "/home/{{ ansible_user }}/.azure/credentials"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0600'

@@ -1,0 +1,28 @@
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+tfplan
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Credentials
+*.pem
+credentials
+credentials.json
+*.tfvars
+!*example.tfvars
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+
+# IDE
+.idea/
+.vscode/

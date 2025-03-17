@@ -1,0 +1,37 @@
+---
+- name: Create deployment script
+  template:
+    src: deployment_script.j2
+    dest: "/opt/cloud-elt-infra/deploy.sh"
+    mode: '0755'
+
+- name: Create tfvars template
+  copy:
+    dest: "/opt/cloud-elt-infra/terraform/terraform.tfvars.example"
+    content: |
+      # Cloud provider (azure or oci)
+      cloud_provider = "{{ cloud_provider }}"
+      
+      # Deployment environment
+      environment = "dev"
+      
+      # Use Airflow (true for OCI, false for Azure)
+      use_airflow = {{ 'true' if cloud_provider == 'oci' else 'false' }}
+      
+      {% if cloud_provider == "azure" %}
+      # Azure variables
+      azure_subscription_id = "{{ azure_subscription_id }}"
+      azure_client_id = "{{ azure_client_id }}"
+      azure_client_secret = "{{ azure_client_secret }}"
+      azure_tenant_id = "{{ azure_tenant_id }}"
+      azure_location = "{{ azure_location }}"
+      {% endif %}
+      
+      {% if cloud_provider == "oci" %}
+      # OCI variables
+      oci_tenancy_ocid = "{{ oci_tenancy_ocid }}"
+      oci_user_ocid = "{{ oci_user_ocid }}"
+      oci_fingerprint = "{{ oci_fingerprint }}"
+      oci_private_key_path = "/home/{{ ansible_user }}/.oci/oci_api_key.pem"
+      oci_region = "{{ oci_region }}"
+      {% endif %}
