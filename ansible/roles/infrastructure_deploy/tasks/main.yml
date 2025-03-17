@@ -1,0 +1,62 @@
+---
+- name: Create terraform variables file
+  template:
+    src: terraform.tfvars.j2
+    dest: "{{ terraform_dir }}/terraform.tfvars"
+    mode: 0644
+  
+- name: Run terraform init
+  command:
+    cmd: terraform init
+    chdir: "{{ terraform_dir }}"
+  register: tf_init_result
+
+- name: Display terraform init results
+  debug:
+    var: tf_init_result.stdout_lines
+
+- name: Run terraform plan
+  command:
+    cmd: terraform plan -out=tfplan
+    chdir: "{{ terraform_dir }}"
+  register: tf_plan_result
+  
+- name: Display terraform plan results
+  debug:
+    var: tf_plan_result.stdout_lines
+
+- name: Confirm terraform apply
+  pause:
+    prompt: "Do you want to apply the Terraform plan? (yes/no)"
+  register: apply_confirmation
+  when: not auto_approve|default(false)|bool
+
+- name: Run terraform apply
+  command:
+    cmd: terraform apply -auto-approve tfplan
+    chdir: "{{ terraform_dir }}"
+  register: tf_apply_result
+  when: auto_approve|default(false)|bool or apply_confirmation.user_input|default('no')|lower == 'yes'
+
+- name: Display terraform apply results
+  debug:
+    var: tf_apply_result.stdout_lines
+  when: auto_approve|default(false)|bool or apply_confirmation.user_input|default('no')|lower == 'yes'
+
+- name: Extract terraform outputs
+  command:
+    cmd: terraform output -json
+    chdir: "{{ terraform_dir }}"
+  register: tf_output_result
+  when: auto_approve|default(false)|bool or apply_confirmation.user_input|default('no')|lower == 'yes'
+
+- name: Parse terraform outputs
+  set_fact:
+    terraform_outputs: "{{ tf_output_result.stdout | from_json }}"
+  when: auto_approve|default(false)|bool or apply_confirmation.user_input|default('no')|lower == 'yes'
+
+- name: Save terraform outputs
+  copy:
+    content: "{{ terraform_outputs | to_nice_json }}"
+    dest: "{{ terraform_dir }}/outputs.json"
+  when: auto_approve|default(false)|bool or apply_confirmation.user_input|default('no')|lower == 'yes'

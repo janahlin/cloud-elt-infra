@@ -1,0 +1,22 @@
+---
+- name: Setup Controller VM for Azure
+  hosts: controller
+  become: yes
+  vars:
+    cloud_provider: "azure"
+  roles:
+    - common
+    - terraform
+    - azure_tools
+    - python_tools
+    - controller_setup
+
+- name: Deploy Azure Infrastructure
+  hosts: controller
+  become: no  # Run as the ansible_user to use configured credentials
+  vars:
+    cloud_provider: "azure"
+    terraform_dir: "/opt/cloud-elt-infra/terraform"
+    environment: "{{ environment | default('dev') }}"
+  roles:
+    - infrastructure_deploy

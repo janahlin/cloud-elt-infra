@@ -1,0 +1,24 @@
+---
+- name: Destroy Cloud Infrastructure
+  hosts: controller
+  become: no
+  vars:
+    terraform_dir: "/opt/cloud-elt-infra/terraform"
+  tasks:
+    - name: Confirm infrastructure destruction
+      pause:
+        prompt: "⚠️ WARNING: This will DESTROY all infrastructure resources. Type 'destroy' to confirm"
+      register: destroy_confirmation
+      when: not force_destroy|default(false)|bool
+
+    - name: Run terraform destroy
+      command:
+        cmd: terraform destroy -auto-approve
+        chdir: "{{ terraform_dir }}"
+      register: destroy_result
+      when: force_destroy|default(false)|bool or destroy_confirmation.user_input|default('')|lower == 'destroy'
+
+    - name: Show destruction results
+      debug:
+        var: destroy_result.stdout_lines
+      when: force_destroy|default(false)|bool or destroy_confirmation.user_input|default('')|lower == 'destroy'

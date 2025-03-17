@@ -1,0 +1,22 @@
+---
+- name: Setup Controller VM for OCI
+  hosts: controller
+  become: yes
+  vars:
+    cloud_provider: "oci"
+  roles:
+    - common
+    - terraform
+    - oci_tools
+    - python_tools
+    - controller_setup
+
+- name: Deploy OCI Infrastructure
+  hosts: controller
+  become: no  # Run as the ansible_user to use configured credentials
+  vars:
+    cloud_provider: "oci"
+    terraform_dir: "/opt/cloud-elt-infra/terraform"
+    environment: "{{ environment | default('dev') }}"
+  roles:
+    - infrastructure_deploy

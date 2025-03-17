@@ -1,0 +1,28 @@
+---
+- name: Check Infrastructure Status
+  hosts: controller
+  become: no
+  vars:
+    terraform_dir: "/opt/cloud-elt-infra/terraform"
+  tasks:
+    - name: Run terraform state list
+      command:
+        cmd: terraform state list
+        chdir: "{{ terraform_dir }}"
+      register: state_list
+
+    - name: Display current infrastructure resources
+      debug:
+        var: state_list.stdout_lines
+
+    - name: Verify key resources exist
+      command:
+        cmd: terraform state show {{ item }}
+        chdir: "{{ terraform_dir }}"
+      loop: "{{ resources_to_check | default(['module.networking']) }}"
+      register: resource_status
+      ignore_errors: yes
+
+    - name: Display resource details
+      debug:
+        var: resource_status.results

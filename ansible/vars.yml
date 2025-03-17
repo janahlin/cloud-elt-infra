@@ -1,0 +1,18 @@
+---
+# Common variables
+project_name: "cloud-elt-infra"
+auto_approve: false  # Set to true to skip confirmation prompt
+
+# Azure variables
+# azure_subscription_id: "your-subscription-id"  # Store in vault or pass via CLI
+# azure_client_id: "your-client-id"
+# azure_client_secret: "your-client-secret"
+# azure_tenant_id: "your-tenant-id"
+azure_location: "eastus"
+databricks_sku: "premium"
+
+# OCI variables
+# oci_tenancy_ocid: "your-tenancy-ocid"  # Store in vault or pass via CLI
+# oci_user_ocid: "your-user-ocid"
+# oci_fingerprint: "your-api-key-fingerprint"
+oci_region: "us-ashburn-1"
