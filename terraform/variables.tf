@@ -69,27 +69,27 @@ variable "azure_tenant_id" {
 }
 
 variable "azure_location" {
-  description = "Azure region"
+  description = "Azure region for resources"
   type        = string
-  default     = "eastus"
+  default     = "eastus2"
 }
 
 variable "storage_tier" {
-  description = "Azure storage tier"
+  description = "Storage tier to use"
   type        = string
-  default     = "Standard_LRS"
+  default     = "Standard_LRS"  # Most economical storage option
 }
 
 variable "databricks_sku" {
-  description = "Databricks SKU"
+  description = "The SKU for Azure Databricks"
   type        = string
-  default     = "premium"
+  default     = "standard"  # Standard tier is more economical than premium
 }
 
 variable "vm_size" {
-  description = "Azure VM size"
+  description = "The size of VM to use in Azure"
   type        = string
-  default     = "Standard_D4s_v3"
+  default     = "Standard_B1s"  # Free tier eligible VM size
 }
 
 # OCI specific variables
@@ -121,7 +121,7 @@ variable "oci_private_key_path" {
 }
 
 variable "oci_region" {
-  description = "OCI Region"
+  description = "OCI region for resources"
   type        = string
   default     = "us-ashburn-1"
 }
@@ -133,7 +133,13 @@ variable "oci_compartment_id" {
 }
 
 variable "compute_shape" {
-  description = "OCI compute shape"
+  description = "The shape of compute instances in OCI"
   type        = string
-  default     = "VM.Standard.E4.Flex"
+  default     = "VM.Standard.E2.1.Micro"  # Always Free Tier eligible
+}
+
+variable "oci_storage_tier" {
+  description = "OCI storage tier"
+  type        = string
+  default     = "Standard"
 }

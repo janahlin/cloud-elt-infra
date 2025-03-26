@@ -1,0 +1,25 @@
+# Vault-encrypted variables template
+# Copy this file to ansible/group_vars/[environment]/vault.yml and encrypt with:
+# ansible-vault encrypt ansible/group_vars/[environment]/vault.yml
+
+# Azure credentials
+azure_subscription_id: "your-subscription-id"
+azure_tenant_id: "your-tenant-id"
+azure_client_id: "your-client-id"
+azure_client_secret: "your-client-secret"
+
+# OCI credentials
+oci_tenancy_ocid: "your-tenancy-ocid"
+oci_user_ocid: "your-user-ocid"
+oci_fingerprint: "your-api-key-fingerprint"
+oci_private_key_path: "~/.oci/oci_api_key.pem"
+oci_passphrase: ""  # If your private key has a passphrase
+
+# Database credentials (if applicable)
+db_username: "admin"
+db_password: "strong-password-here"
+
+# Other sensitive information
+notification_emails:
+  - "admin@example.com"
+  - "alerts@example.com" 

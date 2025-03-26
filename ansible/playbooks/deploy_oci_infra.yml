@@ -4,6 +4,9 @@
   become: yes
   vars:
     cloud_provider: "oci"
+  # Include vault-encrypted variables
+  vars_files:
+    - "../group_vars/{{ environment | default('dev') }}/vault.yml"
   roles:
     - common
     - terraform
@@ -18,5 +21,8 @@
     cloud_provider: "oci"
     terraform_dir: "/opt/cloud-elt-infra/terraform"
     environment: "{{ environment | default('dev') }}"
+  # Include vault-encrypted variables
+  vars_files:
+    - "../group_vars/{{ environment | default('dev') }}/vault.yml"
   roles:
     - infrastructure_deploy

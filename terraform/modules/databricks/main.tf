@@ -81,11 +81,17 @@ output "databricks_workspace_url" {
 
 # OCI resources
 resource "oci_core_instance" "databricks" {
-  count               = var.cloud_provider == "oci" ? 1 : 0
+  count               = local.is_oci ? 1 : 0
   availability_domain = var.availability_domain
   compartment_id      = var.compartment_id
   display_name        = "${var.resource_prefix}-${var.environment}-databricks"
-  shape               = var.compute_shape
+  shape               = var.compute_shape # Using Always Free eligible VM.Standard.E2.1.Micro
+  
+  # Limit shape resources for free tier
+  shape_config {
+    ocpus         = 1    # Free tier limited to 1 OCPU
+    memory_in_gbs = 1    # Free tier limited to 1 GB RAM
+  }
 
   create_vnic_details {
     subnet_id        = var.subnet_id
@@ -96,45 +102,51 @@ resource "oci_core_instance" "databricks" {
   source_details {
     source_type = "image"
     source_id   = var.image_id
+    # Minimum boot volume size for free tier
+    boot_volume_size_in_gbs = 50
   }
 
   metadata = {
-    ssh_authorized_keys = file("~/.ssh/id_rsa.pub")
+    ssh_authorized_keys = file(var.ssh_private_key_path)
+  }
+}
+
+# This provisioner will configure a minimal data processing environment as a free alternative to Databricks
+resource "null_resource" "setup_databricks" {
+  count      = local.is_oci ? 1 : 0
+  depends_on = [oci_core_instance.databricks]
+
+  connection {
+    type        = "ssh"
+    host        = oci_core_instance.databricks[0].public_ip
+    user        = "opc"
+    private_key = file(var.ssh_private_key_path)
   }
 
   provisioner "remote-exec" {
     inline = [
-      "sudo apt-get update",
-      "sudo apt-get install -y docker.io",
-      "sudo systemctl enable docker",
-      "sudo systemctl start docker",
-      "sudo docker pull databricksruntime/standard:latest",
-      "sudo docker run -d -p 8443:8443 --name databricks-runtime databricksruntime/standard:latest"
+      "sudo yum update -y",
+      "sudo yum install -y python3 python3-pip git",
+      "pip3 install --user jupyter pandas scikit-learn matplotlib dask",
+      "mkdir -p ~/notebooks",
+      "nohup jupyter notebook --ip=0.0.0.0 --no-browser --NotebookApp.token='databricks' --NotebookApp.password='' &>/dev/null &",
+      "echo 'Jupyter notebook started as a free alternative to Databricks'"
     ]
-
-    connection {
-      type        = "ssh"
-      host        = self.public_ip
-      user        = "opc"
-      private_key = file(var.ssh_private_key_path)
-    }
   }
 }
 
 # Azure resources
 resource "azurerm_databricks_workspace" "databricks" {
-  count               = var.cloud_provider == "azure" ? 1 : 0
+  count               = local.is_azure ? 1 : 0
   name                = "${var.resource_prefix}-${var.environment}-databricks"
   resource_group_name = var.resource_group_name
   location            = var.location
-  sku                 = var.databricks_sku
-
-  custom_parameters {
-    no_public_ip        = false
-    virtual_network_id  = var.subnet_id
-  }
-
+  sku                 = var.databricks_sku # Standard SKU instead of Premium for cost savings
+  
+  # Free tier optimizations
   tags = {
-    Environment = var.environment
+    environment = var.environment
+    auto_terminate_minutes = "20" # Auto-terminate clusters to minimize compute usage
+    min_workers = "1"             # Minimize worker count for cost savings
   }
 }

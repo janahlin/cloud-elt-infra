@@ -10,6 +10,21 @@ Make sure all prerequisites are installed and configured before proceeding.
 - Ansible 2.9+
 - Terraform 1.0+
 - Valid cloud provider credentials (OCI or Azure)
+
+### Easy Installation of Requirements
+
+We provide scripts to simplify the installation of all required tools:
+
+```sh
+# Check if your environment has the required tools installed
+./scripts/check-tools.sh
+
+# Install all required tools automatically
+./scripts/setup-environment.sh
+```
+
+For detailed installation instructions, see [Installation Guide](docs/installation.md).
+
 ## 🧰 Getting Started
 1. Clone this repository:
    ```sh
@@ -178,10 +193,10 @@ After deployment, you can manage your infrastructure using these commands:
    azure_tenant_id: "<your-tenant-id>"
    azure_location: "eastus2"
 
-   # Resource configuration
-   vm_size: "Standard_D4s_v3"
-   storage_tier: "Standard_LRS"
-   databricks_sku: "premium"
+   # Resource configuration (Free tier optimized)
+   vm_size: "Standard_B1s"      # Free tier eligible
+   storage_tier: "Standard_LRS" # Free tier eligible
+   databricks_sku: "standard"   # More economical than premium
    ```
 
    For OCI (`oci-vars.yml`):
@@ -194,12 +209,21 @@ After deployment, you can manage your infrastructure using these commands:
    # OCI credentials
    oci_tenancy_ocid: "<your-tenancy-ocid>"
    oci_compartment_id: "<your-compartment-id>"
-   oci_region: "us-ashburn-1"
+   oci_region: "us-ashburn-1"   # Region with good free tier support
 
-   # Resource configuration
-   compute_shape: "VM.Standard.E4.Flex"
+   # Resource configuration (Free tier optimized)
+   compute_shape: "VM.Standard.E2.1.Micro" # Always Free eligible
    storage_tier: "Standard"
    ```
+
+### Free Tier Optimizations
+
+This project is configured to use free tier resources whenever possible. Key optimizations include:
+
+- **Azure**: B1s VMs, Standard LRS storage, and economical Databricks configuration
+- **OCI**: Always Free eligible VMs, minimal storage configuration, and free database options
+
+For detailed information on free tier usage, see [Free Tier Usage Guide](docs/free-tier-usage.md).
 
 Important security notes:
 - Never commit credential files to version control
@@ -371,6 +395,7 @@ This project implements several security best practices:
 - Network security groups and firewalls to restrict access
 - Encryption for data at rest and in transit
 - Infrastructure security scanning with tfsec and checkov
+- **Secure credentials management with Ansible Vault and GitHub Secrets**
 
 To run security scans:
 ```sh
@@ -382,6 +407,20 @@ pip install tfsec
 checkov -d terraform/
 tfsec terraform/
 ```
+
+### Secrets Management
+
+We provide tools and documentation for secure credential management:
+
+```sh
+# Set up Ansible Vault for secure credential storage
+./scripts/setup-vault.sh dev  # For dev environment
+./scripts/setup-vault.sh prod # For production environment
+```
+
+GitHub Actions workflows are configured to use GitHub Secrets for all sensitive information.
+
+For detailed information on secrets management, see [Secrets Management Guide](docs/secrets-management.md).
 
 ## 📊 Monitoring & Observability
 The infrastructure includes monitoring components:

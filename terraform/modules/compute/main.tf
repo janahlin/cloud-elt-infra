@@ -85,21 +85,28 @@ output "instance_id" {
 
 # OCI resources
 resource "oci_core_instance" "compute" {
-  count               = var.cloud_provider == "oci" ? 1 : 0
+  count               = local.is_oci ? 1 : 0
   availability_domain = var.availability_domain
   compartment_id      = var.compartment_id
-  display_name        = "${var.resource_prefix}-${var.environment}-compute"
-  shape               = var.compute_shape
+  display_name        = "${var.resource_prefix}-${var.environment}-vm"
+  shape               = var.compute_shape # VM.Standard.E2.1.Micro for Always Free Tier
+
+  shape_config {
+    ocpus         = 1    # Free tier limited to 1 OCPU
+    memory_in_gbs = 1    # Free tier limited to 1 GB RAM
+  }
 
   create_vnic_details {
     subnet_id        = var.subnet_id
-    display_name     = "${var.resource_prefix}-${var.environment}-compute-vnic"
+    display_name     = "${var.resource_prefix}-${var.environment}-vnic"
     assign_public_ip = true
   }
 
   source_details {
     source_type = "image"
     source_id   = var.image_id
+    # Use minimal boot volume size for free tier
+    boot_volume_size_in_gbs = 50
   }
 
   metadata = {
@@ -108,16 +115,17 @@ resource "oci_core_instance" "compute" {
 }
 
 # Azure resources
-resource "azurerm_public_ip" "pip" {
-  count               = var.cloud_provider == "azure" ? 1 : 0
+resource "azurerm_public_ip" "public_ip" {
+  count               = local.is_azure ? 1 : 0
   name                = "${var.resource_prefix}-${var.environment}-pip"
   location            = var.location
   resource_group_name = var.resource_group_name
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
+  sku                 = "Basic"
 }
 
 resource "azurerm_network_interface" "nic" {
-  count               = var.cloud_provider == "azure" ? 1 : 0
+  count               = local.is_azure ? 1 : 0
   name                = "${var.resource_prefix}-${var.environment}-nic"
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -126,15 +134,16 @@ resource "azurerm_network_interface" "nic" {
     name                          = "internal"
     subnet_id                     = var.subnet_id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.pip[0].id
+    public_ip_address_id          = azurerm_public_ip.public_ip[0].id
   }
 }
 
 resource "azurerm_linux_virtual_machine" "vm" {
-  count               = var.cloud_provider == "azure" ? 1 : 0
+  count               = local.is_azure ? 1 : 0
   name                = "${var.resource_prefix}-${var.environment}-vm"
-  location            = var.location
+  computer_name       = "${var.resource_prefix}-${var.environment}-vm"
   resource_group_name = var.resource_group_name
+  location            = var.location
   size                = var.vm_size
   admin_username      = "adminuser"
   network_interface_ids = [
@@ -149,6 +158,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
+    disk_size_gb         = 30
   }
 
   source_image_reference {
@@ -156,5 +166,35 @@ resource "azurerm_linux_virtual_machine" "vm" {
     offer     = "UbuntuServer"
     sku       = "18.04-LTS"
     version   = "latest"
+  }
+  
+  boot_diagnostics {
+    storage_account_uri = null
+  }
+
+  tags = {
+    environment = var.environment
+  }
+}
+
+# Free tier eligible boot volume backup policy - no regular backups
+resource "oci_core_volume_backup_policy_assignment" "boot_volume_backup_policy" {
+  count     = local.is_oci ? 1 : 0
+  asset_id  = data.oci_core_boot_volume_attachments.boot_volume_attachments[0].boot_volume_attachments[0].boot_volume_id
+  policy_id = data.oci_core_volume_backup_policies.boot_volume_backup_policies[0].volume_backup_policies[0].id
+}
+
+data "oci_core_boot_volume_attachments" "boot_volume_attachments" {
+  count          = local.is_oci ? 1 : 0
+  availability_domain = var.availability_domain
+  compartment_id = var.compartment_id
+  instance_id    = oci_core_instance.compute[0].id
+}
+
+data "oci_core_volume_backup_policies" "boot_volume_backup_policies" {
+  count          = local.is_oci ? 1 : 0
+  filter {
+    name   = "display_name"
+    values = ["silver"]
   }
 }

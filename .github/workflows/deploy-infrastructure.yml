@@ -63,6 +63,61 @@ jobs:
           echo "${{ secrets.OCI_PRIVATE_KEY }}" > ~/.oci/private_key.pem
           chmod 600 ~/.oci/private_key.pem
 
+      - name: Create Terraform variables file
+        run: |
+          cat > terraform/${{ github.event.inputs.environment || 'dev' }}.tfvars << EOF
+          cloud_provider = "${{ github.event.inputs.cloud_provider || 'azure' }}"
+          environment    = "${{ github.event.inputs.environment || 'dev' }}"
+          resource_prefix = "${{ secrets.RESOURCE_PREFIX || 'elt' }}"
+          
+          {% if github.event.inputs.cloud_provider == 'azure' || github.event.inputs.cloud_provider == '' %}
+          azure_subscription_id = "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          azure_client_id       = "${{ secrets.AZURE_CLIENT_ID }}"
+          azure_client_secret   = "${{ secrets.AZURE_CLIENT_SECRET }}"
+          azure_tenant_id       = "${{ secrets.AZURE_TENANT_ID }}"
+          azure_location        = "${{ secrets.AZURE_LOCATION || 'eastus2' }}"
+          vm_size               = "${{ secrets.AZURE_VM_SIZE || 'Standard_B1s' }}"
+          storage_tier          = "${{ secrets.AZURE_STORAGE_TIER || 'Standard_LRS' }}"
+          databricks_sku        = "${{ secrets.AZURE_DATABRICKS_SKU || 'standard' }}"
+          {% else %}
+          oci_tenancy_ocid      = "${{ secrets.OCI_TENANCY_OCID }}"
+          oci_user_ocid         = "${{ secrets.OCI_USER_OCID }}"
+          oci_fingerprint       = "${{ secrets.OCI_FINGERPRINT }}"
+          oci_region            = "${{ secrets.OCI_REGION || 'us-ashburn-1' }}"
+          compute_shape         = "${{ secrets.OCI_COMPUTE_SHAPE || 'VM.Standard.E2.1.Micro' }}"
+          {% endif %}
+          EOF
+          
+          sed -i 's/{% if github.event.inputs.cloud_provider == '\''azure'\'' || github.event.inputs.cloud_provider == '\'''\'' %}/\{% if ${{ github.event.inputs.cloud_provider == 'azure' || github.event.inputs.cloud_provider == '' }} %\}/g' terraform/${{ github.event.inputs.environment || 'dev' }}.tfvars
+          sed -i 's/{% else %}/\{% else %\}/g' terraform/${{ github.event.inputs.environment || 'dev' }}.tfvars
+          sed -i 's/{% endif %}/\{% endif %\}/g' terraform/${{ github.event.inputs.environment || 'dev' }}.tfvars
+
+      - name: Create Ansible vault file
+        run: |
+          mkdir -p ansible/group_vars/${{ github.event.inputs.environment || 'dev' }}
+          
+          cat > ansible/group_vars/${{ github.event.inputs.environment || 'dev' }}/vault.yml << EOF
+          azure_subscription_id: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          azure_tenant_id: "${{ secrets.AZURE_TENANT_ID }}"
+          azure_client_id: "${{ secrets.AZURE_CLIENT_ID }}"
+          azure_client_secret: "${{ secrets.AZURE_CLIENT_SECRET }}"
+          
+          oci_tenancy_ocid: "${{ secrets.OCI_TENANCY_OCID }}"
+          oci_user_ocid: "${{ secrets.OCI_USER_OCID }}"
+          oci_fingerprint: "${{ secrets.OCI_FINGERPRINT }}"
+          
+          db_username: "${{ secrets.DB_USERNAME }}"
+          db_password: "${{ secrets.DB_PASSWORD }}"
+          
+          notification_emails:
+            - "${{ secrets.NOTIFICATION_EMAIL }}"
+          EOF
+          
+          echo "${{ secrets.VAULT_PASSWORD }}" > .vault_pass.txt
+          chmod 600 .vault_pass.txt
+          
+          ansible-vault encrypt --vault-password-file .vault_pass.txt ansible/group_vars/${{ github.event.inputs.environment || 'dev' }}/vault.yml
+
       - name: Terraform Init
         run: |
           cd terraform
@@ -117,6 +172,32 @@ jobs:
           echo "${{ secrets.OCI_PRIVATE_KEY }}" > ~/.oci/private_key.pem
           chmod 600 ~/.oci/private_key.pem
 
+      - name: Create Ansible vault file
+        run: |
+          mkdir -p ansible/group_vars/${{ github.event.inputs.environment || 'dev' }}
+          
+          cat > ansible/group_vars/${{ github.event.inputs.environment || 'dev' }}/vault.yml << EOF
+          azure_subscription_id: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          azure_tenant_id: "${{ secrets.AZURE_TENANT_ID }}"
+          azure_client_id: "${{ secrets.AZURE_CLIENT_ID }}"
+          azure_client_secret: "${{ secrets.AZURE_CLIENT_SECRET }}"
+          
+          oci_tenancy_ocid: "${{ secrets.OCI_TENANCY_OCID }}"
+          oci_user_ocid: "${{ secrets.OCI_USER_OCID }}"
+          oci_fingerprint: "${{ secrets.OCI_FINGERPRINT }}"
+          
+          db_username: "${{ secrets.DB_USERNAME }}"
+          db_password: "${{ secrets.DB_PASSWORD }}"
+          
+          notification_emails:
+            - "${{ secrets.NOTIFICATION_EMAIL }}"
+          EOF
+          
+          echo "${{ secrets.VAULT_PASSWORD }}" > .vault_pass.txt
+          chmod 600 .vault_pass.txt
+          
+          ansible-vault encrypt --vault-password-file .vault_pass.txt ansible/group_vars/${{ github.event.inputs.environment || 'dev' }}/vault.yml
+
       - name: Download Terraform plan
         uses: actions/download-artifact@v3
         with:
@@ -133,10 +214,14 @@ jobs:
           cd terraform
           terraform apply -auto-approve tfplan
 
-      - name: Run Ansible for Post-Deployment Configuration
+      - name: Create Ansible inventory
         run: |
           mkdir -p ansible/inventories/${{ github.event.inputs.environment || 'dev' }}
-          echo "${{ secrets.ANSIBLE_INVENTORY }}" > ansible/inventories/${{ github.event.inputs.environment || 'dev' }}/hosts.yml
           
+          echo "${{ secrets.ANSIBLE_INVENTORY }}" > ansible/inventories/${{ github.event.inputs.environment || 'dev' }}/hosts.yml
+
+      - name: Run Ansible for Post-Deployment Configuration
+        run: |
           ansible-playbook -i ansible/inventories/${{ github.event.inputs.environment || 'dev' }}/hosts.yml \
+            --vault-password-file .vault_pass.txt \
             ansible/playbooks/setup_controller.yml 

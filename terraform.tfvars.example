@@ -1,0 +1,25 @@
+cloud_provider = "azure" # Options: "azure" or "oci"
+environment    = "dev"
+resource_prefix = "elt"
+vpc_cidr       = "10.0.0.0/16"
+subnet_count   = 3
+
+# Azure specific variables - optimized for free tier usage
+azure_subscription_id = "your-subscription-id"
+azure_client_id       = "your-client-id"
+azure_client_secret   = "your-client-secret"
+azure_tenant_id       = "your-tenant-id"
+azure_location        = "eastus2"
+vm_size               = "Standard_B1s"     # Free tier eligible VM size
+storage_tier          = "Standard_LRS"     # Free tier storage 
+databricks_sku        = "standard"         # More economical than premium
+
+# OCI specific variables - optimized for free tier usage
+oci_tenancy_ocid      = "your-tenancy-ocid"
+oci_user_ocid         = "your-user-ocid"
+oci_fingerprint       = "your-api-key-fingerprint"
+oci_private_key_path  = "~/.oci/oci_api_key.pem"
+oci_region            = "us-ashburn-1"     # Region with best free tier support
+compute_shape         = "VM.Standard.E2.1.Micro" # Always Free Tier shape
+
+# See docs/free-tier-usage.md for detailed information on free tier optimization 
