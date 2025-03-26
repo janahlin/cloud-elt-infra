@@ -1,0 +1,20 @@
+---
+# Default values for disaster recovery role
+
+# General settings
+dr_enabled: true
+backup_retention_days: 30
+backup_frequency: "daily" # Options: hourly, daily, weekly
+rto_hours: 4 # Recovery Time Objective in hours
+rpo_hours: 24 # Recovery Point Objective in hours
+
+# Azure specific
+azure_backup_vault_sku: "Standard"
+azure_backup_policy: "DefaultPolicy"
+azure_geo_redundant: true
+azure_cross_region_restore: false
+
+# OCI specific
+oci_backup_vault_type: "DEFAULT"
+oci_backup_policy: "bronze"
+oci_cross_region_copy: false 

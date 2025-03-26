@@ -1,0 +1,28 @@
+---
+# Tasks for disaster recovery role
+
+- name: Include cloud provider specific tasks
+  include_tasks: "{{ cloud_provider }}.yml"
+  when: dr_enabled | bool
+
+- name: Create disaster recovery documentation
+  template:
+    src: dr_plan.md.j2
+    dest: "/opt/cloud-elt-infra/docs/disaster_recovery_plan.md"
+  when: dr_enabled | bool
+
+- name: Configure backup monitoring
+  template:
+    src: backup_monitoring.sh.j2
+    dest: "/opt/cloud-elt-infra/scripts/backup_monitoring.sh"
+    mode: '0755'
+  when: dr_enabled | bool
+
+- name: Setup backup monitoring cron job
+  cron:
+    name: "Backup monitoring check"
+    minute: "0"
+    hour: "*/6"
+    job: "/opt/cloud-elt-infra/scripts/backup_monitoring.sh"
+    state: present
+  when: dr_enabled | bool 

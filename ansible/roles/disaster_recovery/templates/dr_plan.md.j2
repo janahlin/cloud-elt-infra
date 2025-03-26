@@ -1,0 +1,77 @@
+# Disaster Recovery Plan for ELT Infrastructure
+
+## Overview
+This document outlines the disaster recovery procedures for the ELT Infrastructure deployed in {{ cloud_provider | upper }}.
+
+- **Recovery Time Objective (RTO)**: {{ rto_hours }} hours
+- **Recovery Point Objective (RPO)**: {{ rpo_hours }} hours
+- **Environment**: {{ environment }}
+- **Last Updated**: {{ ansible_date_time.date }}
+
+## Backup Information
+{% if cloud_provider == 'azure' %}
+- **Backup Vault**: {{ resource_prefix }}-{{ environment }}-backupvault
+- **Backup Policy**: {{ azure_backup_policy }}
+- **Geo-redundant Storage**: {{ azure_geo_redundant | bool | string }}
+- **Cross-region Restore**: {{ azure_cross_region_restore | bool | string }}
+{% elif cloud_provider == 'oci' %}
+- **Backup Vault Type**: {{ oci_backup_vault_type }}
+- **Backup Policy**: {{ oci_backup_policy }}
+- **Cross-region Copy**: {{ oci_cross_region_copy | bool | string }}
+{% endif %}
+
+## Backed-up Resources
+{% if cloud_provider == 'azure' %}
+- Virtual Machines
+- Azure SQL Databases
+- Azure Blob Storage
+- Azure Data Factory
+- Databricks Workspaces
+{% elif cloud_provider == 'oci' %}
+- Compute Instances
+- Block Volumes
+- Object Storage
+- Autonomous Databases
+- Airflow Instances
+{% endif %}
+
+## Recovery Procedures
+
+### 1. Assessment Phase
+1. Identify the scope and impact of the disaster
+2. Determine if DR procedures need to be activated
+3. Notify relevant stakeholders
+
+### 2. Recovery Initiation
+1. Login to {{ cloud_provider | title }} portal
+2. Navigate to backup and recovery services
+3. Select the appropriate recovery point
+{% if cloud_provider == 'azure' %}
+4. For Azure Recovery Services Vault, select "Restore" option
+{% elif cloud_provider == 'oci' %}
+4. For OCI Backup Services, select "Restore" option
+{% endif %}
+
+### 3. Infrastructure Restoration
+Execute the recovery playbook:
+```bash
+ansible-playbook -i ansible/inventories/{{ environment }}/hosts.yml ansible/playbooks/disaster_recovery.yml
+```
+
+### 4. Validation
+1. Verify all services are running
+2. Run post-recovery validation tests:
+```bash
+./scripts/validate-recovery.sh
+```
+
+### 5. Return to Production
+1. Update DNS and other routing configurations
+2. Perform final validation
+3. Notify stakeholders of recovery completion
+
+## Contact Information
+
+- **Primary Contact**: {{ dr_primary_contact | default('TBD') }}
+- **Secondary Contact**: {{ dr_secondary_contact | default('TBD') }}
+- **Operations Team**: {{ dr_ops_team_email | default('ops@example.com') }} 

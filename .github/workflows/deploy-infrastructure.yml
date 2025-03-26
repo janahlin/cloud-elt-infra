@@ -1,0 +1,142 @@
+name: Deploy Infrastructure
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'terraform/**'
+      - 'ansible/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      cloud_provider:
+        description: 'Cloud provider to deploy to'
+        required: true
+        default: 'azure'
+        type: choice
+        options:
+          - azure
+          - oci
+
+jobs:
+  plan:
+    name: Plan Deployment
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'dev' }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.0.0
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install Ansible
+        run: pip install ansible
+
+      - name: Configure Azure credentials
+        if: ${{ github.event.inputs.cloud_provider == 'azure' || github.event.inputs.cloud_provider == '' }}
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Configure OCI credentials
+        if: ${{ github.event.inputs.cloud_provider == 'oci' }}
+        run: |
+          mkdir -p ~/.oci
+          echo "${{ secrets.OCI_CONFIG }}" > ~/.oci/config
+          echo "${{ secrets.OCI_PRIVATE_KEY }}" > ~/.oci/private_key.pem
+          chmod 600 ~/.oci/private_key.pem
+
+      - name: Terraform Init
+        run: |
+          cd terraform
+          terraform init
+
+      - name: Terraform Plan
+        run: |
+          cd terraform
+          terraform plan -var-file="${{ github.event.inputs.environment || 'dev' }}.tfvars" -out=tfplan
+
+      - name: Archive Terraform plan
+        uses: actions/upload-artifact@v3
+        with:
+          name: terraform-plan
+          path: terraform/tfplan
+          retention-days: 5
+
+  deploy:
+    name: Deploy Infrastructure
+    needs: plan
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'dev' }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.0.0
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install Ansible
+        run: pip install ansible
+
+      - name: Configure Azure credentials
+        if: ${{ github.event.inputs.cloud_provider == 'azure' || github.event.inputs.cloud_provider == '' }}
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Configure OCI credentials
+        if: ${{ github.event.inputs.cloud_provider == 'oci' }}
+        run: |
+          mkdir -p ~/.oci
+          echo "${{ secrets.OCI_CONFIG }}" > ~/.oci/config
+          echo "${{ secrets.OCI_PRIVATE_KEY }}" > ~/.oci/private_key.pem
+          chmod 600 ~/.oci/private_key.pem
+
+      - name: Download Terraform plan
+        uses: actions/download-artifact@v3
+        with:
+          name: terraform-plan
+          path: terraform/
+
+      - name: Terraform Init
+        run: |
+          cd terraform
+          terraform init
+
+      - name: Terraform Apply
+        run: |
+          cd terraform
+          terraform apply -auto-approve tfplan
+
+      - name: Run Ansible for Post-Deployment Configuration
+        run: |
+          mkdir -p ansible/inventories/${{ github.event.inputs.environment || 'dev' }}
+          echo "${{ secrets.ANSIBLE_INVENTORY }}" > ansible/inventories/${{ github.event.inputs.environment || 'dev' }}/hosts.yml
+          
+          ansible-playbook -i ansible/inventories/${{ github.event.inputs.environment || 'dev' }}/hosts.yml \
+            ansible/playbooks/setup_controller.yml 

@@ -363,3 +363,40 @@ The modular design allows you to customize your infrastructure:
 ## 📜 License
 
 This project is licensed under the MIT License.
+
+## 🔒 Security & Compliance
+This project implements several security best practices:
+
+- Least privilege access model for all cloud resources
+- Network security groups and firewalls to restrict access
+- Encryption for data at rest and in transit
+- Infrastructure security scanning with tfsec and checkov
+
+To run security scans:
+```sh
+# Install security scanning tools
+pip install checkov
+pip install tfsec
+
+# Run scans
+checkov -d terraform/
+tfsec terraform/
+```
+
+## 📊 Monitoring & Observability
+The infrastructure includes monitoring components:
+
+- Centralized logging via Log Analytics Workspace (Azure) or OCI Logging
+- Metric collection and dashboards 
+- Alerting configuration for critical components
+
+See `terraform/modules/monitoring` for implementation details.
+
+## 🔄 CI/CD Integration
+The repository includes CI/CD pipeline configurations:
+
+- GitHub Actions workflows for testing and deployment
+- Azure DevOps pipeline example
+- Pre-commit hooks for code quality
+
+See `.github/workflows` directory for GitHub Actions configurations.

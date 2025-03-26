@@ -50,19 +50,32 @@ variable "subnet_count" {
 }
 
 variable "storage_tier" {
-  description = "Azure storage tier"
+  description = "The tier of storage to use"
   type        = string
   default     = "Standard_LRS"
 }
 
 variable "databricks_sku" {
-  description = "Databricks SKU"
+  description = "The SKU for Azure Databricks"
   type        = string
   default     = "premium"
 }
 
 variable "vm_size" {
-  description = "Azure VM size"
+  description = "The size of the VM"
   type        = string
   default     = "Standard_D4s_v3"
+}
+
+# New monitoring variables
+variable "log_retention_days" {
+  description = "Number of days to retain logs in Log Analytics Workspace"
+  type        = number
+  default     = 30
+}
+
+variable "alert_email_addresses" {
+  description = "List of email addresses for monitoring alerts"
+  type        = list(string)
+  default     = []
 }

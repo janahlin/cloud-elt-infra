@@ -1,0 +1,72 @@
+---
+# Azure-specific disaster recovery tasks
+
+- name: Ensure Azure CLI is installed
+  pip:
+    name: azure-cli
+    state: present
+  become: yes
+
+- name: Install Azure recovery modules for Python
+  pip:
+    name:
+      - azure-mgmt-recoveryservices
+      - azure-mgmt-recoveryservicesbackup
+    state: present
+  become: yes
+
+- name: Login to Azure
+  shell: |
+    az login --service-principal \
+      --username {{ azure_client_id }} \
+      --password {{ azure_client_secret }} \
+      --tenant {{ azure_tenant_id }}
+  no_log: true
+  register: az_login
+  changed_when: az_login.rc == 0
+
+- name: Set Azure subscription
+  shell: az account set --subscription {{ azure_subscription_id }}
+  register: az_sub
+  changed_when: az_sub.rc == 0
+
+- name: Check for existing Recovery Services Vault
+  shell: |
+    az backup vault list --resource-group {{ resource_group_name }} --query "[?name=='{{ resource_prefix }}-{{ environment }}-backupvault'].id" -o tsv
+  register: backup_vault
+  changed_when: false
+  failed_when: false
+
+- name: Create Recovery Services Vault if not exists
+  shell: |
+    az backup vault create \
+      --name {{ resource_prefix }}-{{ environment }}-backupvault \
+      --resource-group {{ resource_group_name }} \
+      --location {{ location }} \
+      --backup-storage-redundancy "{{ 'GeoRedundant' if azure_geo_redundant else 'LocallyRedundant' }}"
+  when: backup_vault.stdout == ""
+  register: create_vault
+  changed_when: create_vault.rc == 0
+
+- name: Configure backup policy
+  shell: |
+    az backup protection enable-for-vm \
+      --resource-group {{ resource_group_name }} \
+      --vault-name {{ resource_prefix }}-{{ environment }}-backupvault \
+      --vm {{ resource_prefix }}-{{ environment }}-vm \
+      --policy-name {{ azure_backup_policy }}
+  register: backup_config
+  changed_when: backup_config.rc == 0
+  failed_when: false
+
+- name: Create recovery script for VMs
+  template:
+    src: azure_vm_recovery.sh.j2
+    dest: "/opt/cloud-elt-infra/scripts/azure_vm_recovery.sh"
+    mode: '0755'
+  
+- name: Create recovery script for databases
+  template:
+    src: azure_db_recovery.sh.j2
+    dest: "/opt/cloud-elt-infra/scripts/azure_db_recovery.sh"
+    mode: '0755' 

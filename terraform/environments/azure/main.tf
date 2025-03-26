@@ -62,3 +62,16 @@ module "compute" {
   vm_size             = var.vm_size
   subnet_id           = module.networking.subnet_ids[2]
 }
+
+# New monitoring module
+module "monitoring" {
+  source              = "../../modules/monitoring"
+  cloud_provider      = "azure"
+  environment         = var.environment
+  resource_prefix     = var.resource_prefix
+  location            = var.location
+  resource_group_name = azurerm_resource_group.rg.name
+  compute_resource_id = module.compute.vm_id
+  log_retention_days  = var.log_retention_days
+  alert_email_addresses = var.alert_email_addresses
+}

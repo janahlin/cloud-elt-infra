@@ -1,0 +1,40 @@
+---
+- name: Configure Disaster Recovery
+  hosts: controller
+  become: yes
+  vars:
+    cloud_provider: "{{ cloud_provider | default('azure') }}"
+  roles:
+    - common
+    - role: azure_tools
+      when: cloud_provider == "azure"
+    - role: oci_tools
+      when: cloud_provider == "oci"
+    - disaster_recovery
+
+- name: Test Recovery Procedures
+  hosts: controller
+  become: no
+  vars:
+    cloud_provider: "{{ cloud_provider | default('azure') }}"
+    terraform_dir: "/opt/cloud-elt-infra/terraform"
+    recovery_test: "{{ recovery_test | default(false) }}"
+  tasks:
+    - name: Run recovery validation testing
+      shell: |
+        cd /opt/cloud-elt-infra/scripts
+        ./validate-recovery.sh
+      when: recovery_test | bool
+      register: recovery_validation
+      
+    - name: Display validation results
+      debug:
+        var: recovery_validation.stdout_lines
+      when: recovery_test | bool and recovery_validation.stdout is defined
+
+    - name: Prepare recovery documentation
+      shell: |
+        mkdir -p /opt/cloud-elt-infra/docs
+        cp /opt/cloud-elt-infra/docs/disaster_recovery_plan.md /opt/cloud-elt-infra/docs/recovery_runbook.md
+      args:
+        creates: /opt/cloud-elt-infra/docs/recovery_runbook.md 
