@@ -396,6 +396,7 @@ This project implements several security best practices:
 - Encryption for data at rest and in transit
 - Infrastructure security scanning with tfsec and checkov
 - **Secure credentials management with Ansible Vault and GitHub Secrets**
+- **Comprehensive code quality checks with multiple linters**
 
 To run security scans:
 ```sh
@@ -407,6 +408,27 @@ pip install tfsec
 checkov -d terraform/
 tfsec terraform/
 ```
+
+### Code Quality
+
+We use multiple linters to ensure code quality:
+
+```sh
+# Install all linters
+./scripts/install-linters.sh
+
+# Run all linters
+./scripts/run-linters.sh
+```
+
+Our linting suite includes:
+- **TFLint** for Terraform
+- **ansible-lint** for Ansible
+- **Pylint** for Python
+- **ShellCheck** for shell scripts
+- **yamllint** for YAML files
+
+For more details, see [Linting Configuration](docs/linting.md).
 
 ### Secrets Management
 

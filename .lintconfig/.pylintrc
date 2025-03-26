@@ -1,0 +1,91 @@
+[MASTER]
+# Python version to use for checks
+py-version = 3.8
+
+# Output format
+output-format = colorized
+
+# Maximum number of nested blocks for function / method body
+max-nested-blocks = 5
+
+# Control of verbosity
+verbose = no
+
+# Show full paths to errors
+absolute-paths = no
+
+# Ignore specific files or directories
+ignore=CVS,venv,.git,.github,.cache
+
+# Minimum number of public methods for a class
+min-public-methods = 1
+
+# Maximum number of public methods for a class
+max-public-methods = 20
+
+# Minimum number of arguments for a function / method
+min-args = 1
+
+# Maximum number of arguments for a function / method
+max-args = 10
+
+# Maximum line length
+max-line-length = 100
+
+# Maximum module lines
+max-module-lines = 1000
+
+# Maximum cyclomatic complexity
+max-complexity = 10
+
+[MESSAGES CONTROL]
+# Enable/disable specific messages or categories
+disable=
+    C0111, # missing-docstring
+    C0103, # invalid-name
+    C0303, # trailing-whitespace
+    C0330, # bad-continuation
+    W0511, # fixme
+    R0903, # too-few-public-methods
+    R0913, # too-many-arguments
+    E1101, # no-member
+    W0212, # protected-access
+    W0622, # redefined-builtin
+    W0703, # broad-except
+
+[SIMILARITIES]
+# Minimum lines number of a similarity
+min-similarity-lines = 4
+
+# Ignore comments when computing similarities
+ignore-comments = yes
+
+# Ignore docstrings when computing similarities
+ignore-docstrings = yes
+
+# Ignore imports when computing similarities
+ignore-imports = yes
+
+[FORMAT]
+# Expected format of line ending
+expected-line-ending-format = LF
+
+[BASIC]
+# Good variable names which should always be accepted
+good-names=i,j,k,ex,Run,_,id,df
+
+# Bad variable names which should always be refused
+bad-names=foo,bar,baz,toto,tutu,tata
+
+# Naming style for classes
+class-naming-style = PascalCase
+
+# Naming style for functions
+function-naming-style = snake_case
+
+# Naming style for variables
+variable-naming-style = snake_case
+
+[IMPORTS]
+# Allow wildcard imports from modules that define __all__
+allow-wildcard-with-all = yes 

@@ -1,18 +1,22 @@
-name: Terraform Validate
+name: Terraform Validate and Lint
 
 on:
   push:
     branches: [ main, develop ]
     paths:
       - 'terraform/**'
+      - 'ansible/**'
+      - 'scripts/**'
+      - '**/*.py'
+      - '**/*.yml'
+      - '**/*.yaml'
+      - '**/*.sh'
   pull_request:
     branches: [ main, develop ]
-    paths:
-      - 'terraform/**'
   workflow_dispatch:
 
 jobs:
-  validate:
+  terraform_validate:
     name: Validate Terraform
     runs-on: ubuntu-latest
     
@@ -40,10 +44,74 @@ jobs:
           cd terraform
           terraform fmt -check -recursive
 
+  linting:
+    name: Code Linting
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install Ansible
+        run: pip install ansible
+
+      - name: Install linters
+        run: |
+          # Install TFLint
+          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+          
+          # Install Python-based linters
+          pip install ansible-lint pylint yamllint
+          
+          # Install shellcheck
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+
+      - name: Run TFLint
+        run: |
+          cd terraform
+          tflint --recursive --config=../.lintconfig/tflint.hcl
+        continue-on-error: true
+
+      - name: Run ansible-lint
+        run: |
+          ansible-lint -c .lintconfig/.ansible-lint ansible
+        continue-on-error: true
+
+      - name: Run pylint
+        run: |
+          PYTHON_FILES=$(find . -type f -name "*.py" | grep -v "\.git\|venv\|\.cache\|\.lintconfig")
+          if [ -n "$PYTHON_FILES" ]; then
+            pylint --rcfile=.lintconfig/.pylintrc $PYTHON_FILES
+          else
+            echo "No Python files found to lint"
+          fi
+        continue-on-error: true
+
+      - name: Run shellcheck
+        run: |
+          SHELL_FILES=$(find . -type f -name "*.sh" | grep -v "\.git\|venv\|\.cache\|\.lintconfig")
+          if [ -n "$SHELL_FILES" ]; then
+            shellcheck -x --shell=bash $SHELL_FILES
+          else
+            echo "No shell script files found to lint"
+          fi
+        continue-on-error: true
+
+      - name: Run yamllint
+        run: |
+          yamllint -c .lintconfig/.yamllint .
+        continue-on-error: true
+
   security_scan:
     name: Security Scan
     runs-on: ubuntu-latest
-    needs: validate
+    needs: [terraform_validate, linting]
     
     steps:
       - name: Checkout repository

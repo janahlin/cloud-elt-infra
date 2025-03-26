@@ -1,0 +1,35 @@
+---
+# .ansible-lint configuration
+
+# Exclude paths from linting
+exclude_paths:
+  - .git/
+  - .github/
+  - .lintconfig/
+  - venv/
+  - .cache/
+
+# Enable or disable specific rules
+skip_list:
+  - experimental  # Experimental rules are often in flux
+  - no-changed-when  # Tasks that run command/shell/raw should have changed_when
+  - no-handler  # Tasks that notify a handler must have a unique handler name
+  - yaml[line-length]  # Line length should be under 160 characters
+
+# Enable all warnings
+warn_list:
+  - all
+
+# Use fully qualified collection names for modern Ansible
+use_default_rules: true
+offline: false
+
+# Set rule strictness level
+strict: true
+
+# Additional variables to identify roles and playbooks
+extra_vars:
+  environment: dev
+
+# Define verbosity level
+verbosity: 1 
