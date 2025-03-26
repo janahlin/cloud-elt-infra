@@ -1,9 +1,15 @@
 # Cloud ELT Infrastructure
 A cloud infrastructure project for Extract, Load, and Transform (ELT) pipelines using Terraform and Ansible. Supports deployment to both OCI and Azure cloud platforms.
 
+This repository provides Terraform configurations and automation scripts for deploying an ELT pipeline infrastructure on **OCI** and **Azure**. It includes:
+- **Databricks** for data processing
+- **Apache Airflow** (for OCI) or **Azure Data Factory** (for Azure) for workflow orchestration
+- **Python ingestion scripts** for fetching data from external sources
+- **dbt models** for transformation
+- **Ansible automation** for controller VM setup
 
 ## 🔍 Prerequisites
-Make sure all prerequisites are installed and configured before proceeding.
+Make sure all prerequisites are installed and configured before proceeding:
 
 - Git
 - Python 3.8+
@@ -11,25 +17,15 @@ Make sure all prerequisites are installed and configured before proceeding.
 - Terraform 1.0+
 - Valid cloud provider credentials (OCI or Azure)
 
-### Easy Installation of Requirements
+## 🧰 Getting Started
 
-We provide scripts to simplify the installation of all required tools:
-
+### 1. Clone the Repository
 ```sh
-# Check if your environment has the required tools installed
-./scripts/check-tools.sh
-
-# Install all required tools automatically
-./scripts/setup-environment.sh
-
-# Set up a Python virtual environment (recommended)
-./scripts/setup-venv.sh
+git clone https://github.com/JanAhlin/cloud-elt-infra.git
+cd cloud-elt-infra
 ```
 
-For detailed installation instructions, see [Installation Guide](docs/installation.md).
-
-### Python Virtual Environment (Recommended)
-
+### 2. Set Up Python Virtual Environment (Recommended)
 We strongly recommend using a Python virtual environment for this project:
 
 ```sh
@@ -43,51 +39,123 @@ venv\Scripts\activate     # Windows
 
 The virtual environment isolates your project dependencies and makes the installation of linters and other tools smoother. See [Virtual Environment Guide](docs/virtual-environment.md) for more details.
 
-## 🧰 Getting Started
-1. Clone this repository:
-   ```sh
-   git clone https://github.com/JanAhlin/cloud-elt-infra.git
-   cd cloud-elt-infra
-   ```
+### 3. Install Required Tools
+We provide scripts to simplify the installation of all required tools:
 
-2. Install required tools:
-   ```sh
-   # Set up Python virtual environment (recommended)
-   ./scripts/setup-venv.sh
-   
-   # Or install dependencies globally (not recommended)
-   pip install -r requirements.txt
+```sh
+# Check if your environment has the required tools installed
+./scripts/check-tools.sh
 
-   # Terraform
-   # Download from https://www.terraform.io/downloads.html
+# Install all required tools automatically
+./scripts/setup-environment.sh
+```
 
-   # Cloud CLIs
-   # Azure CLI: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
-   # OCI CLI: https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliinstall.htm
-   ```
+If you prefer to install tools manually:
 
-3. Configure cloud credentials:
-   ```sh
-   # For Azure
-   az login
+```sh
+# Cloud CLIs
+# Azure CLI: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
+# OCI CLI: https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliinstall.htm
 
-   # For OCI
-   oci setup config
-   ```
+# Terraform
+# Download from https://www.terraform.io/downloads.html
+```
 
-4. Create your configuration file:
-   ```sh
-   cp config.example.yml config.yml
-   # Edit config.yml with your settings
-   ```
+For detailed installation instructions, see [Installation Guide](docs/installation.md).
 
-This repository provides Terraform configurations and automation scripts for deploying an ELT pipeline infrastructure on **OCI** and **Azure**. It includes:
-- **Databricks** for data processing
-- **Apache Airflow** (for OCI) or **Azure Data Factory** (for Azure) for workflow orchestration
-- **Python ingestion scripts** for fetching data from external sources
-- **dbt models** for transformation
-- **Ansible automation** for controller VM setup
+### 4. Configure Cloud Credentials
 
+```sh
+# For Azure
+az login
+
+# For OCI
+oci setup config
+```
+
+### 5. Create Configuration Files
+
+```sh
+# For Azure deployments
+cp example.azure-vars.yml azure-vars.yml
+
+# For OCI deployments
+cp example.oci-vars.yml oci-vars.yml
+```
+
+Edit the configuration files with your specific settings.
+
+## 🔧 Configuration Options
+
+### Basic Settings
+
+For Azure (`azure-vars.yml`):
+```yaml
+# Environment settings
+environment: "dev"             # Options: dev, staging, prod
+resource_prefix: "elt"         # Prefix for all resource names
+auto_approve: false            # Set true to skip Terraform prompts
+
+# Azure credentials
+azure_subscription_id: "<your-subscription-id>"
+azure_tenant_id: "<your-tenant-id>"
+azure_location: "eastus2"
+
+# Resource configuration (Free tier optimized)
+vm_size: "Standard_B1s"        # Free tier eligible
+storage_tier: "Standard_LRS"   # Free tier eligible
+databricks_sku: "standard"     # More economical than premium
+```
+
+For OCI (`oci-vars.yml`):
+```yaml
+# Environment settings
+environment: "dev"             # Options: dev, staging, prod
+resource_prefix: "elt"         # Prefix for all resource names
+auto_approve: false            # Set true to skip Terraform prompts
+
+# OCI credentials
+oci_tenancy_ocid: "<your-tenancy-ocid>"
+oci_compartment_id: "<your-compartment-id>"
+oci_region: "us-ashburn-1"     # Region with good free tier support
+
+# Resource configuration (Free tier optimized)
+compute_shape: "VM.Standard.E2.1.Micro" # Always Free eligible
+storage_tier: "Standard"
+```
+
+### Advanced Settings
+
+You can also configure more advanced settings:
+
+```yaml
+# Network settings
+vpc_cidr: "10.0.0.0/16"
+subnet_count: 3
+
+# High-performance resource sizing (Azure)
+vm_size: "Standard_D4s_v3"
+storage_tier: "Standard_LRS"
+databricks_sku: "premium"
+
+# High-performance resource sizing (OCI)
+compute_shape: "VM.Standard.E4.Flex"
+storage_tier: "Standard"
+```
+
+### Free Tier Optimizations
+
+This project is configured to use free tier resources whenever possible. Key optimizations include:
+
+- **Azure**: B1s VMs, Standard LRS storage, and economical Databricks configuration
+- **OCI**: Always Free eligible VMs, minimal storage configuration, and free database options
+
+For detailed information on free tier usage, see [Free Tier Usage Guide](docs/free-tier-usage.md).
+
+Important security notes:
+- Never commit credential files to version control
+- Use environment variables or secure vaults in production
+- Add `*-vars.yml` to your `.gitignore`
 
 ## 📌 Repository Structure
 ```
@@ -134,28 +202,30 @@ This repository provides Terraform configurations and automation scripts for dep
 ```
 
 ## 🚀 Deployment Instructions
+
 This project uses Ansible to fully automate infrastructure deployments, including the Terraform provisioning process:
 
-1. Prepare Your Environment:
-   After cloning the repository, create and configure your hosts file:
-   ```sh
-   mkdir -p ansible/inventories/development
-   cp ansible/inventories/example/hosts.yml ansible/inventories/development/hosts.yml
-   # Edit ansible/inventories/development/hosts.yml with your controller VM details
-   ```
+### 1. Prepare Your Environment
+After cloning the repository, create and configure your hosts file:
 
-2. Deploy Infrastructure:
-   Choose your target cloud provider and run the appropriate playbook:
+```sh
+mkdir -p ansible/inventories/development
+cp ansible/inventories/example/hosts.yml ansible/inventories/development/hosts.yml
+# Edit ansible/inventories/development/hosts.yml with your controller VM details
+```
 
-   For Azure:
-   ```sh
-   ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_azure_infra.yml -e @azure-vars.yml
-   ```
+### 2. Deploy Infrastructure
+Choose your target cloud provider and run the appropriate playbook:
 
-   For OCI:
-   ```sh
-   ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_oci_infra.yml -e @oci-vars.yml
-   ```
+For Azure:
+```sh
+ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_azure_infra.yml -e @azure-vars.yml
+```
+
+For OCI:
+```sh
+ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_oci_infra.yml -e @oci-vars.yml
+```
 
 These playbooks will:
 1. Clone the repository to the controller VM
@@ -164,8 +234,7 @@ These playbooks will:
 4. Run infrastructure deployment scripts
 5. Validate the deployment status
 
-The sequence includes checks at each step to ensure successful completion before proceeding.
-
+### 3. Verify Deployment
 To verify the infrastructure post-deployment:
 ```sh
 # View deployed resources
@@ -174,236 +243,41 @@ terraform show
 # Check infrastructure status
 ./scripts/check-status.sh
 ```
-1. Set up the controller VM with all required tools
-2. Configure cloud provider credentials
-3. Generate and apply Terraform configurations
-4. Deploy the complete ELT infrastructure
 
-## Infrastructure Management
-After deployment, you can manage your infrastructure using these commands:
-
-## 🔧 Configuration Options
-
-1. Clone the repository and set up your environment:
-   ```sh
-   git clone https://github.com/JanAhlin/cloud-elt-infra.git
-   cd cloud-elt-infra
-   ```
-
-2. Create and configure your cloud-specific variable files:
-   ```sh
-   cp example.azure-vars.yml azure-vars.yml  # For Azure deployments
-   cp example.oci-vars.yml oci-vars.yml      # For OCI deployments
-   ```
-
-3. Configure your cloud provider credentials:
-
-   For Azure (`azure-vars.yml`):
-   ```yaml
-   # Environment settings
-   environment: "dev"
-   resource_prefix: "elt"
-   auto_approve: false
-
-   # Azure credentials
-   azure_subscription_id: "<your-subscription-id>"
-   azure_tenant_id: "<your-tenant-id>"
-   azure_location: "eastus2"
-
-   # Resource configuration (Free tier optimized)
-   vm_size: "Standard_B1s"      # Free tier eligible
-   storage_tier: "Standard_LRS" # Free tier eligible
-   databricks_sku: "standard"   # More economical than premium
-   ```
-
-   For OCI (`oci-vars.yml`):
-   ```yaml
-   # Environment settings
-   environment: "dev"
-   resource_prefix: "elt"
-   auto_approve: false
-
-   # OCI credentials
-   oci_tenancy_ocid: "<your-tenancy-ocid>"
-   oci_compartment_id: "<your-compartment-id>"
-   oci_region: "us-ashburn-1"   # Region with good free tier support
-
-   # Resource configuration (Free tier optimized)
-   compute_shape: "VM.Standard.E2.1.Micro" # Always Free eligible
-   storage_tier: "Standard"
-   ```
-
-### Free Tier Optimizations
-
-This project is configured to use free tier resources whenever possible. Key optimizations include:
-
-- **Azure**: B1s VMs, Standard LRS storage, and economical Databricks configuration
-- **OCI**: Always Free eligible VMs, minimal storage configuration, and free database options
-
-For detailed information on free tier usage, see [Free Tier Usage Guide](docs/free-tier-usage.md).
-
-Important security notes:
-- Never commit credential files to version control
-- Use environment variables or secure vaults in production
-- Add `*-vars.yml` to your `.gitignore`
-
-The infrastructure deployment will automatically configure:
-- Azure Data Factory for Azure deployments
-- Apache Airflow for OCI deployments
-```yaml
-# Common Configuration Settings
-
-## Initial Setup
-1. Fork and clone the repository:
-   ```sh
-   git clone https://github.com/YourUsername/cloud-elt-infra.git
-   cd cloud-elt-infra
-   ```
-
-2. Create configuration files:
-   ```sh
-   cp example.azure-vars.yml azure-vars.yml
-   cp example.oci-vars.yml oci-vars.yml
-   ```
-
-# Configuration Settings
-
-## Basic Settings
-```yaml
-# Environment settings
-environment: "dev"      # Options: dev, staging, prod
-auto_approve: false     # Set true to skip Terraform prompts
-resource_prefix: "elt"  # Prefix for all resource names
-
-# Resource sizing
-vm_size: "Standard_D4s_v3"
-storage_tier: "Standard_LRS"
-## Basic Settings
-```yaml
-# Common environment settings
-environment: "dev"      # Options: dev, staging, prod
-auto_approve: false     # Set true to skip Terraform prompts
-resource_prefix: "elt"  # Prefix for all resource names
-
-# Resource sizing (Azure)
-vm_size: "Standard_D4s_v3"
-storage_tier: "Standard_LRS"
-databricks_sku: "premium"
-
-# Resource sizing (OCI)
-compute_shape: "VM.Standard.E4.Flex"
-storage_tier: "Standard"
-
-# Network settings
-vpc_cidr: "10.0.0.0/16"
-subnet_count: 3
-```
-
-## Cloud Provider Settings
-Configure your chosen cloud provider:
-
-For Azure (`azure-vars.yml`):
-```yaml
-# Azure credentials
-subscription_id: "<subscription-id>"
-tenant_id: "<tenant-id>"
-location: "eastus2"
-```
-
-For OCI (`oci-vars.yml`):
-```yaml
-# OCI credentials
-tenancy_ocid: "<tenancy-ocid>"
-compartment_id: "<compartment-id>"
-region: "us-ashburn-1"
-```
-
-The configuration files contain sensitive information. Make sure to:
-1. Never commit credential files to version control
-2. Use environment variables or secure vaults in production
-3. Keep the `*-vars.yml` files in your `.gitignore`
-environment: "dev"
-auto_approve: false  # Set to true to skip confirmation prompts
-
-# Azure credentials
-azure_subscription_id: "your-subscription-id"
-azure_client_id: "your-client-id"
-azure_client_secret: "your-client-secret"
-azure_tenant_id: "your-tenant-id"
-azure_location: "eastus2"
-
-# Resource configuration
-databricks_sku: "premium"
-```
-Example oci-vars.yml:
-```yaml
-# Common settings
-environment: "dev"
-auto_approve: false
-
-# OCI credentials
-oci_tenancy_ocid: "your-tenancy-ocid"
-oci_user_ocid: "your-user-ocid"
-oci_fingerprint: "your-api-key-fingerprint"
-oci_region: "us-ashburn-1"
-```
-
-Cloud-Specific Options
-The infrastructure deployment will automatically select:
-
-Azure Data Factory for Azure deployments
-Apache Airflow for OCI deployments
-🔄 Advanced Usage
-## Advanced Usage
+## 🔄 Infrastructure Management
 
 ### Partial Deployments
 You can deploy specific components of the infrastructure:
 
-1. Deploy only networking:
-   ```sh
-   ansible-playbook ansible/playbooks/deploy_azure_infra.yml --tags "networking" -e @azure-vars.yml
-   # or for OCI
-   ansible-playbook ansible/playbooks/deploy_oci_infra.yml --tags "networking" -e @oci-vars.yml
-   ```
+```sh
+# Deploy only networking
+ansible-playbook ansible/playbooks/deploy_azure_infra.yml --tags "networking" -e @azure-vars.yml
 
-2. Deploy only compute resources:
-   ```sh
-   ansible-playbook ansible/playbooks/deploy_azure_infra.yml --tags "compute" -e @azure-vars.yml
-   # or for OCI
-   ansible-playbook ansible/playbooks/deploy_oci_infra.yml --tags "compute" -e @oci-vars.yml
-   ```
+# Deploy only compute resources
+ansible-playbook ansible/playbooks/deploy_azure_infra.yml --tags "compute" -e @azure-vars.yml
 
-3. Update specific components:
-   ```sh
-   ansible-playbook ansible/playbooks/deploy_azure_infra.yml --tags "update,databricks" -e @azure-vars.yml
-   # or for OCI
-   ansible-playbook ansible/playbooks/deploy_oci_infra.yml --tags "update,airflow" -e @oci-vars.yml
-   ```
+# Update specific components
+ansible-playbook ansible/playbooks/deploy_azure_infra.yml --tags "update,databricks" -e @azure-vars.yml
+```
 
-### Infrastructure Management
-Common management tasks:
+Replace `deploy_azure_infra.yml` with `deploy_oci_infra.yml` for OCI deployments.
 
-1. Check infrastructure status:
-   ```sh
-   ansible-playbook ansible/playbooks/check_infra_status.yml -i ansible/inventories/development/hosts.yml
-   ```
+### Common Management Tasks
 
-2. Destroy infrastructure:
-   ```sh
-   ansible-playbook ansible/playbooks/destroy_infra.yml -i ansible/inventories/development/hosts.yml
-   ```
+```sh
+# Check infrastructure status
+ansible-playbook ansible/playbooks/check_infra_status.yml -i ansible/inventories/development/hosts.yml
 
-Customizing the Deployment
+# Destroy infrastructure
+ansible-playbook ansible/playbooks/destroy_infra.yml -i ansible/inventories/development/hosts.yml
+```
+
+### Customizing the Deployment
 The modular design allows you to customize your infrastructure:
 
-1. Modify Terraform modules in /terraform/modules/
-2. Create custom Ansible roles in roles
-3. Update variable templates in templates
-
-
-## 📜 License
-
-This project is licensed under the MIT License.
+1. Modify Terraform modules in `/terraform/modules/`
+2. Create custom Ansible roles in `ansible/roles/`
+3. Update variable templates in `templates/`
 
 ## 🔒 Security & Compliance
 This project implements several security best practices:
@@ -412,11 +286,14 @@ This project implements several security best practices:
 - Network security groups and firewalls to restrict access
 - Encryption for data at rest and in transit
 - Infrastructure security scanning with tfsec and checkov
-- **Secure credentials management with Ansible Vault and GitHub Secrets**
-- **Comprehensive code quality checks with multiple linters**
+- Secure credentials management with Ansible Vault and GitHub Secrets
+- Comprehensive code quality checks with multiple linters
 
-To run security scans:
+### Security Scans
 ```sh
+# Activate your virtual environment first
+source venv/bin/activate
+
 # Install security scanning tools
 pip install checkov
 pip install tfsec
@@ -463,7 +340,7 @@ We provide tools and documentation for secure credential management:
 
 GitHub Actions workflows are configured to use GitHub Secrets for all sensitive information.
 
-For detailed information on secrets management, see [Secrets Management Guide](docs/secrets-management.md).
+For detailed information, see [Secrets Management Guide](docs/secrets-management.md).
 
 ## 📊 Monitoring & Observability
 The infrastructure includes monitoring components:
@@ -482,3 +359,7 @@ The repository includes CI/CD pipeline configurations:
 - Pre-commit hooks for code quality
 
 See `.github/workflows` directory for GitHub Actions configurations.
+
+## 📜 License
+
+This project is licensed under the MIT License.
