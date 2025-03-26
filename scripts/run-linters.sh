@@ -29,6 +29,30 @@ warning() {
 # Initialize error counter
 ERRORS=0
 
+# Check if running in virtual environment
+check_venv() {
+  title "Checking virtual environment"
+  
+  if [ -z "$VIRTUAL_ENV" ]; then
+    warning "Not running in a Python virtual environment."
+    warning "It's strongly recommended to run Python linters in a virtual environment."
+    warning "Some linters might not be available or might use system versions."
+    warning "To create and activate a virtual environment run:"
+    warning "  ./scripts/setup-venv.sh"
+    warning "  source venv/bin/activate  # Linux/macOS"
+    warning "  venv\\Scripts\\activate     # Windows"
+    
+    read -p "Continue without a virtual environment? (y/n) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+      echo "Exiting. Please create a virtual environment and try again."
+      exit 1
+    fi
+  else
+    success "Running in virtual environment: $VIRTUAL_ENV"
+  fi
+}
+
 # Check if required tools are installed
 check_tools() {
   title "Checking for required linting tools"
@@ -178,6 +202,7 @@ run_yamllint() {
 
 # Main function
 main() {
+  check_venv
   check_tools
   
   echo ""

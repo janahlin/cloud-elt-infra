@@ -39,6 +39,29 @@ fi
 title "Installing linters for your cloud-elt-infra project"
 echo "Detected OS: $OS"
 
+# Check if running in virtual environment
+check_venv() {
+  title "Checking virtual environment"
+  
+  if [ -z "$VIRTUAL_ENV" ]; then
+    warning "Not running in a Python virtual environment."
+    warning "It's strongly recommended to install Python linters in a virtual environment."
+    warning "To create and activate a virtual environment run:"
+    warning "  ./scripts/setup-venv.sh"
+    warning "  source venv/bin/activate  # Linux/macOS"
+    warning "  venv\\Scripts\\activate     # Windows"
+    
+    read -p "Continue without a virtual environment? (y/n) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+      echo "Exiting. Please create a virtual environment and try again."
+      exit 1
+    fi
+  else
+    success "Running in virtual environment: $VIRTUAL_ENV"
+  fi
+}
+
 # Install TFLint
 install_tflint() {
   title "Installing TFLint (Terraform Linter)"
@@ -156,16 +179,7 @@ install_yamllint() {
 # Main function
 main() {
   # Check if running in virtual environment
-  if [ -z "$VIRTUAL_ENV" ]; then
-    warning "Not running in a Python virtual environment."
-    warning "It's recommended to install Python linters in a virtual environment."
-    read -p "Continue anyway? (y/n) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-      echo "Exiting. Please activate a virtual environment and try again."
-      exit 1
-    fi
-  fi
+  check_venv
   
   install_tflint
   install_ansible_lint
@@ -179,6 +193,14 @@ main() {
   echo ""
   echo "You can now run the linters using:"
   echo "  ./scripts/run-linters.sh"
+  
+  if [ -n "$VIRTUAL_ENV" ]; then
+    echo ""
+    echo "Note: These linters are installed in your current virtual environment."
+    echo "Make sure to activate this environment when running the linters:"
+    echo "  source $(basename $VIRTUAL_ENV)/bin/activate  # Linux/macOS"
+    echo "  $(basename $VIRTUAL_ENV)\\Scripts\\activate     # Windows"
+  fi
 }
 
 # Run main function

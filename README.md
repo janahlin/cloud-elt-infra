@@ -21,9 +21,27 @@ We provide scripts to simplify the installation of all required tools:
 
 # Install all required tools automatically
 ./scripts/setup-environment.sh
+
+# Set up a Python virtual environment (recommended)
+./scripts/setup-venv.sh
 ```
 
 For detailed installation instructions, see [Installation Guide](docs/installation.md).
+
+### Python Virtual Environment (Recommended)
+
+We strongly recommend using a Python virtual environment for this project:
+
+```sh
+# Create and activate a virtual environment
+./scripts/setup-venv.sh
+
+# If already created, activate it manually:
+source venv/bin/activate  # Linux/macOS
+venv\Scripts\activate     # Windows
+```
+
+The virtual environment isolates your project dependencies and makes the installation of linters and other tools smoother. See [Virtual Environment Guide](docs/virtual-environment.md) for more details.
 
 ## 🧰 Getting Started
 1. Clone this repository:
@@ -34,15 +52,14 @@ For detailed installation instructions, see [Installation Guide](docs/installati
 
 2. Install required tools:
    ```sh
-   # Python and pip
-   python -m pip install --upgrade pip
+   # Set up Python virtual environment (recommended)
+   ./scripts/setup-venv.sh
+   
+   # Or install dependencies globally (not recommended)
    pip install -r requirements.txt
 
    # Terraform
    # Download from https://www.terraform.io/downloads.html
-
-   # Ansible
-   pip install ansible
 
    # Cloud CLIs
    # Azure CLI: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
@@ -414,6 +431,10 @@ tfsec terraform/
 We use multiple linters to ensure code quality:
 
 ```sh
+# Activate your virtual environment first
+source venv/bin/activate  # Linux/macOS
+venv\Scripts\activate     # Windows
+
 # Install all linters
 ./scripts/install-linters.sh
 

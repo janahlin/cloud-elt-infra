@@ -12,11 +12,27 @@ We use several linting tools to ensure code quality and consistency across the p
 4. **ShellCheck** - For shell scripts
 5. **yamllint** - For YAML files
 
-## Installation
+## Virtual Environment
 
-To install all required linters, run:
+It's strongly recommended to use a Python virtual environment when installing and running linters. This isolates the linters and their dependencies from your system Python installation.
 
 ```bash
+# Set up a new virtual environment
+./scripts/setup-venv.sh
+
+# Activate the existing virtual environment
+source venv/bin/activate  # Linux/macOS
+venv\Scripts\activate     # Windows
+```
+
+For detailed information about setting up and using a virtual environment, see [Virtual Environment Guide](virtual-environment.md).
+
+## Installation
+
+To install all required linters, first activate your virtual environment, then run:
+
+```bash
+source venv/bin/activate  # Activate your virtual environment first
 ./scripts/install-linters.sh
 ```
 
@@ -27,6 +43,7 @@ This script will detect your operating system and install the appropriate versio
 To run all linters at once:
 
 ```bash
+source venv/bin/activate  # Activate your virtual environment first
 ./scripts/run-linters.sh
 ```
 
