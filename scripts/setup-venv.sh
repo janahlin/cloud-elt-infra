@@ -41,9 +41,17 @@ check_python() {
   fi
   
   # Check Python version
-  PY_VERSION=$($PYTHON_CMD -c "import sys; print('.'.join(map(str, sys.version_info[:2])))")
-  if (( $(echo "$PY_VERSION < 3.8" | bc -l) )); then
+  PY_VERSION=$($PYTHON_CMD -c "import sys; print('{}.{}'.format(sys.version_info.major, sys.version_info.minor))")
+  
+  # Parse version major and minor parts
+  MAJOR_VERSION=$(echo $PY_VERSION | cut -d. -f1)
+  MINOR_VERSION=$(echo $PY_VERSION | cut -d. -f2)
+  
+  # Compare version to 3.8
+  if [ "$MAJOR_VERSION" -lt 3 ] || ([ "$MAJOR_VERSION" -eq 3 ] && [ "$MINOR_VERSION" -lt 8 ]); then
     error "Python 3.8+ is required, but found version $PY_VERSION. Please upgrade Python."
+  else
+    success "Python version $PY_VERSION meets the 3.8+ requirement"
   fi
 }
 

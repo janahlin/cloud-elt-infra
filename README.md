@@ -76,52 +76,40 @@ oci setup config
 ### 5. Create Configuration Files
 
 ```sh
-# For Azure deployments
-cp example.azure-vars.yml azure-vars.yml
-
-# For OCI deployments
-cp example.oci-vars.yml oci-vars.yml
+# Copy the example Terraform variables file
+cp terraform.tfvars.example terraform.tfvars
 ```
 
-Edit the configuration files with your specific settings.
+Edit the terraform.tfvars file with your specific settings for either Azure or OCI deployment.
 
 ## 🔧 Configuration Options
 
 ### Basic Settings
 
-For Azure (`azure-vars.yml`):
-```yaml
-# Environment settings
-environment: "dev"             # Options: dev, staging, prod
-resource_prefix: "elt"         # Prefix for all resource names
-auto_approve: false            # Set true to skip Terraform prompts
+Your terraform.tfvars file should include the appropriate settings for your target platform:
 
-# Azure credentials
-azure_subscription_id: "<your-subscription-id>"
-azure_tenant_id: "<your-tenant-id>"
-azure_location: "eastus2"
+```hcl
+# Common settings
+environment     = "dev"
+resource_prefix = "elt"
+auto_approve    = false
 
-# Resource configuration (Free tier optimized)
-vm_size: "Standard_B1s"        # Free tier eligible
-storage_tier: "Standard_LRS"   # Free tier eligible
-databricks_sku: "standard"     # More economical than premium
-```
+# Uncomment and configure the section for your chosen cloud provider:
 
-For OCI (`oci-vars.yml`):
-```yaml
-# Environment settings
-environment: "dev"             # Options: dev, staging, prod
-resource_prefix: "elt"         # Prefix for all resource names
-auto_approve: false            # Set true to skip Terraform prompts
+# Azure configuration
+# azure_subscription_id = "your-subscription-id"
+# azure_tenant_id       = "your-tenant-id"
+# azure_location        = "eastus2"
+# vm_size               = "Standard_B1s"        # Free tier eligible
+# storage_tier          = "Standard_LRS"        # Free tier eligible
+# databricks_sku        = "standard"            # More economical than premium
 
-# OCI credentials
-oci_tenancy_ocid: "<your-tenancy-ocid>"
-oci_compartment_id: "<your-compartment-id>"
-oci_region: "us-ashburn-1"     # Region with good free tier support
-
-# Resource configuration (Free tier optimized)
-compute_shape: "VM.Standard.E2.1.Micro" # Always Free eligible
-storage_tier: "Standard"
+# OCI configuration
+# oci_tenancy_ocid      = "your-tenancy-ocid"
+# oci_compartment_id    = "your-compartment-id"
+# oci_region            = "us-ashburn-1"        # Region with good free tier support
+# compute_shape         = "VM.Standard.E2.1.Micro" # Always Free eligible
+# storage_tier          = "Standard"
 ```
 
 ### Advanced Settings
@@ -219,12 +207,12 @@ Choose your target cloud provider and run the appropriate playbook:
 
 For Azure:
 ```sh
-ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_azure_infra.yml -e @azure-vars.yml
+ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_azure_infra.yml -e @terraform.tfvars
 ```
 
 For OCI:
 ```sh
-ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_oci_infra.yml -e @oci-vars.yml
+ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_oci_infra.yml -e @terraform.tfvars
 ```
 
 These playbooks will:
@@ -251,13 +239,13 @@ You can deploy specific components of the infrastructure:
 
 ```sh
 # Deploy only networking
-ansible-playbook ansible/playbooks/deploy_azure_infra.yml --tags "networking" -e @azure-vars.yml
+ansible-playbook ansible/playbooks/deploy_azure_infra.yml --tags "networking" -e @terraform.tfvars
 
 # Deploy only compute resources
-ansible-playbook ansible/playbooks/deploy_azure_infra.yml --tags "compute" -e @azure-vars.yml
+ansible-playbook ansible/playbooks/deploy_azure_infra.yml --tags "compute" -e @terraform.tfvars
 
 # Update specific components
-ansible-playbook ansible/playbooks/deploy_azure_infra.yml --tags "update,databricks" -e @azure-vars.yml
+ansible-playbook ansible/playbooks/deploy_azure_infra.yml --tags "update,databricks" -e @terraform.tfvars
 ```
 
 Replace `deploy_azure_infra.yml` with `deploy_oci_infra.yml` for OCI deployments.
