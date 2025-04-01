@@ -73,43 +73,66 @@ az login
 oci setup config
 ```
 
-### 5. Create Configuration Files
+### 5. Set Up Secure Credential Management
+
+We use Ansible Vault to securely store and manage credentials. This approach ensures that sensitive information is never committed to version control.
 
 ```sh
-# Copy the example Terraform variables file
-cp terraform.tfvars.example terraform.tfvars
+# Set up Ansible Vault for dev environment
+./scripts/setup-ansible-vault.sh dev
+
+# Set up Ansible Vault for production environment
+./scripts/setup-ansible-vault.sh prod
 ```
 
-Edit the terraform.tfvars file with your specific settings for either Azure or OCI deployment.
+This will create an encrypted vault file where you can securely store your cloud credentials. The deployment process will automatically generate the necessary terraform.tfvars file from these credentials.
+
+For detailed information about the secure credentials management approach, see [Secrets Management Guide](docs/secrets-management.md).
 
 ## 🔧 Configuration Options
 
 ### Basic Settings
 
-Your terraform.tfvars file should include the appropriate settings for your target platform:
+You'll configure your deployment using two types of files:
 
-```hcl
-# Common settings
-environment     = "dev"
-resource_prefix = "elt"
-auto_approve    = false
+1. **Regular Ansible variables** (`ansible/group_vars/all/vars.yml`) for non-sensitive settings:
 
-# Uncomment and configure the section for your chosen cloud provider:
+```yaml
+# Environment configuration
+cloud_provider: "azure"  # or "oci"
+environment: "dev"
+resource_prefix: "elt"
+vpc_cidr: "10.0.0.0/16"
+subnet_count: 3
 
-# Azure configuration
-# azure_subscription_id = "your-subscription-id"
-# azure_tenant_id       = "your-tenant-id"
-# azure_location        = "eastus2"
-# vm_size               = "Standard_B1s"        # Free tier eligible
-# storage_tier          = "Standard_LRS"        # Free tier eligible
-# databricks_sku        = "standard"            # More economical than premium
+# Azure resource configuration
+azure_location: "eastus2"
+storage_tier: "Standard_LRS"
+databricks_sku: "standard"
+vm_size: "Standard_B1s"
 
-# OCI configuration
-# oci_tenancy_ocid      = "your-tenancy-ocid"
-# oci_compartment_id    = "your-compartment-id"
-# oci_region            = "us-ashburn-1"        # Region with good free tier support
-# compute_shape         = "VM.Standard.E2.1.Micro" # Always Free eligible
-# storage_tier          = "Standard"
+# Monitoring configuration
+log_retention_days: 30
+alert_email_addresses: 
+  - "admin@example.com"
+```
+
+2. **Encrypted Ansible Vault** (`ansible/group_vars/dev/vault.yml`) for sensitive credentials:
+
+```yaml
+# Azure credentials
+vault_azure_subscription_id: "your-subscription-id"
+vault_azure_tenant_id: "your-tenant-id"
+vault_azure_client_id: "your-client-id"         # Required for Service Principal auth
+vault_azure_client_secret: "your-client-secret" # Required for Service Principal auth
+
+# Authentication method
+use_service_principal: false  # true = Service Principal, false = Managed Identity
+
+# OCI credentials
+vault_oci_tenancy_ocid: "your-tenancy-ocid"
+vault_oci_user_ocid: "your-user-ocid"
+vault_oci_fingerprint: "your-api-key-fingerprint"
 ```
 
 ### Advanced Settings
@@ -139,11 +162,6 @@ This project is configured to use free tier resources whenever possible. Key opt
 - **OCI**: Always Free eligible VMs, minimal storage configuration, and free database options
 
 For detailed information on free tier usage, see [Free Tier Usage Guide](docs/free-tier-usage.md).
-
-Important security notes:
-- Never commit credential files to version control
-- Use environment variables or secure vaults in production
-- Add `*-vars.yml` to your `.gitignore`
 
 ## 📌 Repository Structure
 ```
@@ -207,20 +225,30 @@ Choose your target cloud provider and run the appropriate playbook:
 
 For Azure:
 ```sh
-ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_azure_infra.yml -e @terraform.tfvars
+# Using a vault password prompt
+ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_azure_infra.yml --ask-vault-pass
+
+# Or using a vault password file
+ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_azure_infra.yml --vault-password-file .vault_pass
 ```
 
 For OCI:
 ```sh
-ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_oci_infra.yml -e @terraform.tfvars
+# Using a vault password prompt
+ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_oci_infra.yml --ask-vault-pass
+
+# Or using a vault password file
+ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_oci_infra.yml --vault-password-file .vault_pass
 ```
 
 These playbooks will:
-1. Clone the repository to the controller VM
-2. Install required dependencies (Python, Terraform, cloud CLIs)
-3. Configure authentication and credentials
-4. Run infrastructure deployment scripts
-5. Validate the deployment status
+1. Read your credentials from the encrypted vault
+2. Generate the terraform.tfvars file securely
+3. Clone the repository to the controller VM
+4. Install required dependencies (Python, Terraform, cloud CLIs)
+5. Configure authentication and credentials
+6. Run infrastructure deployment scripts
+7. Validate the deployment status
 
 ### 3. Verify Deployment
 To verify the infrastructure post-deployment:
@@ -239,13 +267,13 @@ You can deploy specific components of the infrastructure:
 
 ```sh
 # Deploy only networking
-ansible-playbook ansible/playbooks/deploy_azure_infra.yml --tags "networking" -e @terraform.tfvars
+ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_azure_infra.yml --tags "networking" --ask-vault-pass
 
 # Deploy only compute resources
-ansible-playbook ansible/playbooks/deploy_azure_infra.yml --tags "compute" -e @terraform.tfvars
+ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_azure_infra.yml --tags "compute" --ask-vault-pass
 
 # Update specific components
-ansible-playbook ansible/playbooks/deploy_azure_infra.yml --tags "update,databricks" -e @terraform.tfvars
+ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_azure_infra.yml --tags "update,databricks" --ask-vault-pass
 ```
 
 Replace `deploy_azure_infra.yml` with `deploy_oci_infra.yml` for OCI deployments.

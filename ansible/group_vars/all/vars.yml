@@ -1,0 +1,26 @@
+# Environment configuration
+cloud_provider: "azure"  # Options: "azure" or "oci"
+environment: "dev"       # Options: "dev", "staging", "prod"
+resource_prefix: "elt"
+vpc_cidr: "10.0.0.0/16"
+subnet_count: 3
+
+# Azure resource configuration
+azure_location: "eastus2"
+storage_tier: "Standard_LRS"    # Free tier eligible
+databricks_sku: "standard"      # More economical than premium
+vm_size: "Standard_B1s"         # Free tier eligible
+
+# OCI resource configuration (only needed for OCI deployments)
+oci_region: "us-ashburn-1"      # Region with best free tier support
+compute_shape: "VM.Standard.E2.1.Micro"  # Always Free eligible shape
+
+# SSH Key paths for OCI (only needed for OCI deployments)
+# ssh_public_key_path: "~/.ssh/id_rsa.pub"
+# ssh_private_key_path: "~/.ssh/id_rsa"
+# oci_private_key_path: "~/.oci/oci_api_key.pem"
+
+# Monitoring configuration
+log_retention_days: 30
+alert_email_addresses:
+  - "admin@example.com"

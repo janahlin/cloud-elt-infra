@@ -48,14 +48,14 @@ variable "azure_subscription_id" {
 }
 
 variable "azure_client_id" {
-  description = "Azure Client ID"
+  description = "Azure Client ID (leave empty to use managed identity)"
   type        = string
   default     = ""
   sensitive   = true
 }
 
 variable "azure_client_secret" {
-  description = "Azure Client Secret"
+  description = "Azure Client Secret (leave empty to use managed identity)"
   type        = string
   default     = ""
   sensitive   = true
@@ -75,9 +75,9 @@ variable "azure_location" {
 }
 
 variable "storage_tier" {
-  description = "Storage tier to use"
+  description = "Storage tier to use (for both Azure and OCI)"
   type        = string
-  default     = "Standard_LRS"  # Most economical storage option
+  default     = "Standard_LRS"  # Most economical storage option for Azure
 }
 
 variable "databricks_sku" {
@@ -138,8 +138,28 @@ variable "compute_shape" {
   default     = "VM.Standard.E2.1.Micro"  # Always Free Tier eligible
 }
 
-variable "oci_storage_tier" {
-  description = "OCI storage tier"
+# SSH Keys for OCI compute
+variable "ssh_public_key" {
+  description = "SSH public key for OCI compute instances"
   type        = string
-  default     = "Standard"
+  default     = ""
+}
+
+variable "ssh_private_key_path" {
+  description = "Path to SSH private key for OCI compute instances"
+  type        = string
+  default     = "~/.ssh/id_rsa"
+}
+
+# Monitoring configuration
+variable "log_retention_days" {
+  description = "Number of days to retain logs"
+  type        = number
+  default     = 30
+}
+
+variable "alert_email_addresses" {
+  description = "Email addresses to send alerts to"
+  type        = list(string)
+  default     = []
 }

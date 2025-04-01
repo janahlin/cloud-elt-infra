@@ -1,3 +1,4 @@
+# Common variables
 variable "environment" {
   description = "Environment (dev, staging, prod)"
   type        = string
@@ -8,11 +9,17 @@ variable "resource_prefix" {
   type        = string
 }
 
-variable "location" {
-  description = "Azure region"
+variable "vpc_cidr" {
+  description = "CIDR block for VPC/VNet"
   type        = string
 }
 
+variable "subnet_count" {
+  description = "Number of subnets to create"
+  type        = number
+}
+
+# Azure specific variables
 variable "azure_subscription_id" {
   description = "Azure Subscription ID"
   type        = string
@@ -20,14 +27,16 @@ variable "azure_subscription_id" {
 }
 
 variable "azure_client_id" {
-  description = "Azure Client ID"
+  description = "Azure Client ID (leave empty to use managed identity)"
   type        = string
+  default     = ""
   sensitive   = true
 }
 
 variable "azure_client_secret" {
-  description = "Azure Client Secret"
+  description = "Azure Client Secret (leave empty to use managed identity)"
   type        = string
+  default     = ""
   sensitive   = true
 }
 
@@ -37,45 +46,35 @@ variable "azure_tenant_id" {
   sensitive   = true
 }
 
-variable "vpc_cidr" {
-  description = "CIDR block for VNet"
+variable "location" {
+  description = "Azure region for resources"
   type        = string
-  default     = "10.0.0.0/16"
-}
-
-variable "subnet_count" {
-  description = "Number of subnets to create"
-  type        = number
-  default     = 3
 }
 
 variable "storage_tier" {
-  description = "The tier of storage to use"
+  description = "Storage tier to use"
   type        = string
-  default     = "Standard_LRS"
 }
 
 variable "databricks_sku" {
   description = "The SKU for Azure Databricks"
   type        = string
-  default     = "premium"
 }
 
 variable "vm_size" {
-  description = "The size of the VM"
+  description = "The size of VM to use in Azure"
   type        = string
-  default     = "Standard_D4s_v3"
 }
 
-# New monitoring variables
+# Monitoring configuration
 variable "log_retention_days" {
-  description = "Number of days to retain logs in Log Analytics Workspace"
+  description = "Number of days to retain logs"
   type        = number
   default     = 30
 }
 
 variable "alert_email_addresses" {
-  description = "List of email addresses for monitoring alerts"
+  description = "Email addresses to send alerts to"
   type        = list(string)
   default     = []
 }

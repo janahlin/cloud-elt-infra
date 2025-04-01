@@ -1,0 +1,19 @@
+# Azure credentials
+vault_azure_subscription_id: "your-subscription-id"
+vault_azure_tenant_id: "your-tenant-id"
+vault_azure_client_id: "your-client-id"         # Required for Service Principal auth
+vault_azure_client_secret: "your-client-secret" # Required for Service Principal auth
+
+# Authentication method for Azure
+use_service_principal: false  # Set to true to use Service Principal, false for Managed Identity
+
+# OCI credentials
+vault_oci_tenancy_ocid: "your-tenancy-ocid"
+vault_oci_user_ocid: "your-user-ocid"
+vault_oci_fingerprint: "your-api-key-fingerprint"
+
+# SSH private key content for OCI (if needed)
+vault_oci_ssh_private_key: |
+  -----BEGIN RSA PRIVATE KEY-----
+  Your private key content here
+  -----END RSA PRIVATE KEY----- 

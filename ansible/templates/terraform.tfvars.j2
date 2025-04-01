@@ -1,0 +1,49 @@
+# Common variables
+cloud_provider = "{{ cloud_provider }}"
+environment = "{{ environment }}"
+resource_prefix = "{{ resource_prefix }}"
+vpc_cidr = "{{ vpc_cidr }}"
+subnet_count = {{ subnet_count }}
+
+# Azure variables
+azure_subscription_id = "{{ vault_azure_subscription_id }}"
+azure_tenant_id = "{{ vault_azure_tenant_id }}"
+azure_location = "{{ azure_location }}"
+storage_tier = "{{ storage_tier }}"
+databricks_sku = "{{ databricks_sku }}"
+vm_size = "{{ vm_size }}"
+
+{% if use_service_principal | default(false) %}
+# Service Principal authentication (Option 1)
+azure_client_id = "{{ vault_azure_client_id }}"
+azure_client_secret = "{{ vault_azure_client_secret }}"
+{% else %}
+# Using Managed Identity authentication (Option 2)
+# azure_client_id and azure_client_secret are intentionally omitted
+{% endif %}
+
+{% if cloud_provider == "oci" %}
+# OCI variables
+oci_tenancy_ocid = "{{ vault_oci_tenancy_ocid }}"
+oci_user_ocid = "{{ vault_oci_user_ocid }}"
+oci_fingerprint = "{{ vault_oci_fingerprint }}"
+oci_region = "{{ oci_region | default('us-ashburn-1') }}"
+compute_shape = "{{ compute_shape | default('VM.Standard.E2.1.Micro') }}"
+{% if oci_private_key_path is defined %}
+oci_private_key_path = "{{ oci_private_key_path }}"
+{% else %}
+oci_private_key_path = "~/.oci/oci_api_key.pem"
+{% endif %}
+{% if ssh_public_key is defined %}
+ssh_public_key = "{{ ssh_public_key }}"
+{% endif %}
+{% if ssh_private_key_path is defined %}
+ssh_private_key_path = "{{ ssh_private_key_path }}"
+{% else %}
+ssh_private_key_path = "~/.ssh/id_rsa"
+{% endif %}
+{% endif %}
+
+# Monitoring configuration
+log_retention_days = {{ log_retention_days }}
+alert_email_addresses = {{ alert_email_addresses | to_json }} 

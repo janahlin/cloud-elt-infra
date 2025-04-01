@@ -32,14 +32,23 @@ provider "oci" {
   region          = var.oci_region
 }
 
-# Configure Azure provider if using Azure
+# Configure Azure provider if using Azure with Service Principal
 provider "azurerm" {
-  count           = var.cloud_provider == "azure" ? 1 : 0
+  count           = var.cloud_provider == "azure" && var.azure_client_id != "" ? 1 : 0
   features {}
   subscription_id = var.azure_subscription_id
   client_id       = var.azure_client_id
   client_secret   = var.azure_client_secret
   tenant_id       = var.azure_tenant_id
+}
+
+# Configure Azure provider if using Azure with Managed Identity
+provider "azurerm" {
+  count         = var.cloud_provider == "azure" && var.azure_client_id == "" ? 1 : 0
+  features {}
+  subscription_id = var.azure_subscription_id
+  tenant_id       = var.azure_tenant_id
+  # No client_id or client_secret - will use managed identity
 }
 
 # Route to appropriate environment based on cloud_provider variable
@@ -68,4 +77,8 @@ module "environment" {
   storage_tier          = var.storage_tier
   databricks_sku        = var.databricks_sku
   vm_size               = var.vm_size
+  
+  # These variables are used by the monitoring module
+  log_retention_days    = try(var.log_retention_days, 30)
+  alert_email_addresses = try(var.alert_email_addresses, [])
 }

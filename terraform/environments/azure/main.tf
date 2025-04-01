@@ -1,9 +1,11 @@
 provider "azurerm" {
   features {}
   subscription_id = var.azure_subscription_id
-  client_id       = var.azure_client_id
-  client_secret   = var.azure_client_secret
   tenant_id       = var.azure_tenant_id
+  
+  # Only include client_id and client_secret if using Service Principal auth
+  client_id       = var.azure_client_id != "" ? var.azure_client_id : null
+  client_secret   = var.azure_client_secret != "" ? var.azure_client_secret : null
 }
 
 resource "azurerm_resource_group" "rg" {
