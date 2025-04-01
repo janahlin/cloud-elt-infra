@@ -23,4 +23,4 @@ compute_shape: "VM.Standard.E2.1.Micro"  # Always Free eligible shape
 # Monitoring configuration
 log_retention_days: 30
 alert_email_addresses:
-  - "admin@example.com"
+  - "jan.ahlin@gmail.com"

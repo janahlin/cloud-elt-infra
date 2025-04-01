@@ -60,3 +60,5 @@ env/
 # Logs
 *.log
 logs/
+# Ansible vault password files
+.vault_pass*.txt

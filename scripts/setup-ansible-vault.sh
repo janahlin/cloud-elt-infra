@@ -106,8 +106,15 @@ EOF
   read -p "Would you like to save the vault password to a file? (y/n) " -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
-    read -p "Enter path for password file [.vault_pass]: " VAULT_PASS_FILE
-    VAULT_PASS_FILE=${VAULT_PASS_FILE:-.vault_pass}
+    # Use environment-specific default name for the password file
+    if [ "$ENV" = "dev" ]; then
+      DEFAULT_PASS_FILE=".vault_pass"
+    else
+      DEFAULT_PASS_FILE=".vault_pass_$ENV"
+    fi
+    
+    read -p "Enter path for password file [$DEFAULT_PASS_FILE]: " VAULT_PASS_FILE
+    VAULT_PASS_FILE=${VAULT_PASS_FILE:-$DEFAULT_PASS_FILE}
     
     # Prompt for password
     read -s -p "Enter the vault password again: " VAULT_PASS
