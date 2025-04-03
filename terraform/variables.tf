@@ -108,14 +108,14 @@ variable "oci_user_ocid" {
 }
 
 variable "oci_fingerprint" {
-  description = "OCI API Key fingerprint"
+  description = "OCI API Key Fingerprint"
   type        = string
   default     = ""
   sensitive   = true
 }
 
 variable "oci_private_key_path" {
-  description = "Path to the OCI API private key"
+  description = "Path to OCI API private key"
   type        = string
   default     = "~/.oci/oci_api_key.pem"
 }
@@ -126,29 +126,91 @@ variable "oci_region" {
   default     = "us-ashburn-1"
 }
 
-variable "oci_compartment_id" {
-  description = "OCI compartment ID"
-  type        = string
-  default     = ""
-}
-
 variable "compute_shape" {
-  description = "The shape of compute instances in OCI"
+  description = "OCI compute shape"
   type        = string
-  default     = "VM.Standard.E2.1.Micro"  # Always Free Tier eligible
+  default     = "VM.Standard.E2.1.Micro"
 }
 
-# SSH Keys for OCI compute
 variable "ssh_public_key" {
-  description = "SSH public key for OCI compute instances"
+  description = "SSH public key content"
   type        = string
   default     = ""
 }
 
 variable "ssh_private_key_path" {
-  description = "Path to SSH private key for OCI compute instances"
+  description = "Path to SSH private key"
   type        = string
   default     = "~/.ssh/id_rsa"
+}
+
+# Storage configuration
+variable "oci_storage_tier" {
+  description = "OCI object storage tier"
+  type        = string
+  default     = "Standard"
+}
+
+variable "oci_storage_versioning" {
+  description = "Enable OCI object storage versioning"
+  type        = string
+  default     = "Disabled"
+}
+
+variable "oci_storage_auto_tiering" {
+  description = "Enable OCI object storage auto-tiering"
+  type        = string
+  default     = "Disabled"
+}
+
+variable "oci_storage_lifecycle_days" {
+  description = "Number of days before objects are deleted in OCI storage"
+  type        = number
+  default     = 30
+}
+
+variable "azure_storage_account_tier" {
+  description = "Azure storage account tier"
+  type        = string
+  default     = "Standard"
+}
+
+variable "azure_storage_min_tls_version" {
+  description = "Minimum TLS version for Azure storage"
+  type        = string
+  default     = "TLS1_2"
+}
+
+variable "azure_storage_container_access_type" {
+  description = "Access type for Azure storage container"
+  type        = string
+  default     = "private"
+}
+
+# Compute configuration
+variable "oci_compute_ocpus" {
+  description = "Number of OCPUs for OCI compute instances"
+  type        = number
+  default     = 1
+}
+
+variable "oci_compute_memory_gb" {
+  description = "Memory in GB for OCI compute instances"
+  type        = number
+  default     = 1
+}
+
+# Databricks configuration
+variable "databricks_docker_port" {
+  description = "Port for Databricks Docker container"
+  type        = number
+  default     = 8443
+}
+
+variable "databricks_docker_image" {
+  description = "Docker image for Databricks"
+  type        = string
+  default     = "databricks/community-edition"
 }
 
 # Monitoring configuration
@@ -159,7 +221,7 @@ variable "log_retention_days" {
 }
 
 variable "alert_email_addresses" {
-  description = "Email addresses to send alerts to"
+  description = "Email addresses for alerts"
   type        = list(string)
   default     = []
 }

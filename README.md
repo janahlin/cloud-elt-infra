@@ -89,6 +89,17 @@ This will create an encrypted vault file where you can securely store your cloud
 
 For detailed information about managing secrets and credentials, see [Secrets Management](docs/secrets-management.md).
 
+### 6. Configure Terraform Variables
+
+Terraform variables are managed through a combination of Ansible variables and vault files:
+
+```sh
+# Generate terraform.tfvars from Ansible variables
+./scripts/generate-terraform-vars.sh dev
+```
+
+This will create the necessary `terraform.tfvars` file based on your Ansible configuration. For detailed information about Terraform configuration, see [Terraform Configuration](docs/terraform.md).
+
 ## 🔧 Configuration Options
 
 ### Basic Settings
@@ -98,55 +109,58 @@ You'll configure your deployment using two types of files:
 1. **Regular Ansible variables** (`ansible/group_vars/all/vars.yml`) for non-sensitive settings:
 
 ```yaml
-# Environment configuration
+# Common settings
 cloud_provider: "azure"  # or "oci"
-environment: "dev"
+environment: "dev"       # or "staging", "prod"
 resource_prefix: "elt"
 vpc_cidr: "10.0.0.0/16"
 subnet_count: 3
 
-# Azure resource configuration
+# Azure-specific settings
 azure_location: "eastus2"
 storage_tier: "Standard_LRS"
 databricks_sku: "standard"
 vm_size: "Standard_B1s"
+azure_storage_account_tier: "Standard"
+azure_storage_min_tls_version: "TLS1_2"
+azure_storage_container_access_type: "private"
+
+# OCI-specific settings
+oci_region: "us-ashburn-1"
+compute_shape: "VM.Standard.E2.1.Micro"
+oci_storage_tier: "Standard"
+oci_storage_versioning: "Enabled"
+oci_storage_auto_tiering: "Enabled"
+oci_storage_lifecycle_days: 30
+oci_compute_ocpus: 1
+oci_compute_memory_gb: 1
+
+# Databricks configuration
+databricks_docker_port: 8443
+databricks_docker_image: "databricks/community-edition"
 
 # Monitoring configuration
 log_retention_days: 30
-alert_email_addresses:
-  - "admin@example.com"
-  - "support@example.com"
+alert_email_addresses: "your-email@example.com"
 ```
 
-2. **Encrypted Ansible Vault** (`ansible/group_vars/<environment>/vault.yml`) for sensitive credentials. A template is provided at `ansible/group_vars/all/vault.yml.example`:
+2. **Encrypted Ansible vault** (`ansible/group_vars/all/vault.yml`) for sensitive credentials:
 
 ```yaml
 # Azure credentials
-vault_azure_subscription_id: "your-subscription-id"
-vault_azure_tenant_id: "your-tenant-id"
-vault_azure_client_id: "your-client-id"         # Required for Service Principal auth
-vault_azure_client_secret: "your-client-secret" # Required for Service Principal auth
-
-# Authentication method
-use_service_principal: false  # true = Service Principal, false = Managed Identity
+azure_subscription_id: "your-subscription-id"
+azure_client_id: "your-client-id"
+azure_client_secret: "your-client-secret"
+azure_tenant_id: "your-tenant-id"
 
 # OCI credentials
-vault_oci_tenancy_ocid: "your-tenancy-ocid"
-vault_oci_user_ocid: "your-user-ocid"
-vault_oci_fingerprint: "your-api-key-fingerprint"
-vault_oci_private_key: "your-private-key-content"
-vault_oci_ssh_private_key: |
-  -----BEGIN RSA PRIVATE KEY-----
-  Your private key content here
-  -----END RSA PRIVATE KEY-----
-
-# Database credentials
-vault_db_username: "your-database-username"
-vault_db_password: "your-database-password"
-vault_db_host: "your-database-host"
-vault_db_port: "5432"
-vault_db_name: "your-database-name"
+oci_tenancy_ocid: "your-tenancy-ocid"
+oci_user_ocid: "your-user-ocid"
+oci_fingerprint: "your-api-key-fingerprint"
+ssh_public_key: "your-ssh-public-key-content"
 ```
+
+For detailed configuration options, see [Configuration Guide](docs/configuration.md).
 
 ### Advanced Settings
 
@@ -161,10 +175,13 @@ subnet_count: 3
 vm_size: "Standard_D4s_v3"
 storage_tier: "Standard_LRS"
 databricks_sku: "premium"
+azure_storage_account_tier: "Premium"
 
 # High-performance resource sizing (OCI)
 compute_shape: "VM.Standard.E4.Flex"
 storage_tier: "Standard"
+oci_compute_ocpus: 4
+oci_compute_memory_gb: 16
 ```
 
 ### Free Tier Optimizations
@@ -228,9 +245,21 @@ This project uses Ansible to fully automate infrastructure deployments, includin
 After cloning the repository, create and configure your hosts file:
 
 ```sh
+# Create your environment directory
 mkdir -p ansible/inventories/development
+
+# Copy the example hosts file
 cp ansible/inventories/example/hosts.yml ansible/inventories/development/hosts.yml
-# Edit ansible/inventories/development/hosts.yml with your controller VM details
+
+# Edit the hosts file with your controller VM details
+# You need to specify:
+# - ansible_host: IP address of your controller VM
+# - ansible_user: SSH user for connecting to the controller
+# - ansible_ssh_private_key_file: Path to your SSH private key
+# Optional settings:
+# - ansible_ssh_pass: If using password authentication
+# - ansible_become: true (if sudo access is needed)
+# - ansible_become_pass: sudo password (if needed)
 ```
 
 ### 2. Deploy Infrastructure
@@ -239,156 +268,59 @@ Choose your target cloud provider and run the appropriate playbook:
 For Azure:
 ```sh
 # Using a vault password prompt
-ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_azure_infra.yml --ask-vault-pass
+ansible-playbook -i ansible/inventories/development ansible/playbooks/deploy_azure_infra.yml --ask-vault-pass
 
-# Or using a vault password file
-ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_azure_infra.yml --vault-password-file .vault_pass_dev
+# Using a vault password file
+ansible-playbook -i ansible/inventories/development ansible/playbooks/deploy_azure_infra.yml --vault-password-file .vault_pass_dev.txt
 ```
 
 For OCI:
 ```sh
 # Using a vault password prompt
-ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_oci_infra.yml --ask-vault-pass
+ansible-playbook -i ansible/inventories/development ansible/playbooks/deploy_oci_infra.yml --ask-vault-pass
 
-# Or using a vault password file
-ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_oci_infra.yml --vault-password-file .vault_pass_dev
+# Using a vault password file
+ansible-playbook -i ansible/inventories/development ansible/playbooks/deploy_oci_infra.yml --vault-password-file .vault_pass_dev.txt
 ```
 
-These playbooks will:
-1. Read your credentials from the encrypted vault
-2. Generate the terraform.tfvars file securely
-3. Clone the repository to the controller VM
-4. Install required dependencies (Python, Terraform, cloud CLIs)
-5. Configure authentication and credentials
-6. Run infrastructure deployment scripts
-7. Validate the deployment status
+The playbooks will:
+1. Set up the controller VM
+2. Configure cloud provider tools
+3. Deploy the infrastructure using Terraform
+4. Configure monitoring and logging
 
-### 3. Verify Deployment
-To verify the infrastructure post-deployment:
-```sh
-# View deployed resources
-terraform show
+For detailed deployment instructions, see [Deployment Guide](docs/deployment.md).
 
-# Check infrastructure status
-./scripts/check-status.sh
-```
+## 🔒 Security Considerations
 
-## 🔄 Infrastructure Management
+### Credential Management
+- All sensitive credentials are stored in encrypted Ansible vault files
+- Vault password files are never committed to version control
+- Each environment has its own vault password file
+- Terraform state files are stored securely in cloud storage
 
-### Partial Deployments
-You can deploy specific components of the infrastructure:
+### Network Security
+- VPCs are configured with minimal required access
+- Security groups restrict access to necessary ports
+- Private subnets are used for sensitive resources
+- Public access is limited to required endpoints
 
-```sh
-# Deploy only networking
-ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_azure_infra.yml --tags "networking" --ask-vault-pass
+### Monitoring and Logging
+- Cloud provider monitoring tools are configured
+- Logs are retained for 30 days by default
+- Alerts are sent to configured email addresses
+- Security events are logged and monitored
 
-# Deploy only compute resources
-ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_azure_infra.yml --tags "compute" --ask-vault-pass
+For detailed security information, see [Security Guide](docs/security.md).
 
-# Update specific components
-ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_azure_infra.yml --tags "update,databricks" --ask-vault-pass
-```
+## 🤝 Contributing
 
-Replace `deploy_azure_infra.yml` with `deploy_oci_infra.yml` for OCI deployments.
+We welcome contributions! Please see our [Contributing Guide](docs/contributing.md) for details on:
+- How to submit pull requests
+- Our coding standards
+- The review process
+- How to report issues
 
-### Common Management Tasks
+## 📄 License
 
-```sh
-# Check infrastructure status
-ansible-playbook ansible/playbooks/check_infra_status.yml -i ansible/inventories/development/hosts.yml
-
-# Destroy infrastructure
-ansible-playbook ansible/playbooks/destroy_infra.yml -i ansible/inventories/development/hosts.yml
-```
-
-### Customizing the Deployment
-The modular design allows you to customize your infrastructure:
-
-1. Modify Terraform modules in `/terraform/modules/`
-2. Create custom Ansible roles in `ansible/roles/`
-3. Update variable templates in `templates/`
-
-## 🔒 Security & Compliance
-This project implements several security best practices:
-
-- Least privilege access model for all cloud resources
-- Network security groups and firewalls to restrict access
-- Encryption for data at rest and in transit
-- Infrastructure security scanning with tfsec and checkov
-- Secure credentials management with Ansible Vault and GitHub Secrets
-- Comprehensive code quality checks with multiple linters
-
-### Security Scans
-```sh
-# Activate your virtual environment first
-source venv/bin/activate
-
-# Install security scanning tools
-pip install checkov
-pip install tfsec
-
-# Run scans
-checkov -d terraform/
-tfsec terraform/
-```
-
-### Code Quality
-
-We use multiple linters to ensure code quality:
-
-```sh
-# Activate your virtual environment first
-source venv/bin/activate  # Linux/macOS
-venv\Scripts\activate     # Windows
-
-# Install all linters
-./scripts/install-linters.sh
-
-# Run all linters
-./scripts/run-linters.sh
-```
-
-Our linting suite includes:
-- **TFLint** for Terraform
-- **ansible-lint** for Ansible
-- **Pylint** for Python
-- **ShellCheck** for shell scripts
-- **yamllint** for YAML files
-
-For more details, see [Linting Configuration](docs/linting.md).
-
-### Secrets Management
-
-We provide tools and documentation for secure credential management:
-
-```sh
-# Set up Ansible Vault for secure credential storage
-./scripts/setup-ansible-vault.sh dev  # For dev environment
-./scripts/setup-ansible-vault.sh prod # For production environment
-```
-
-GitHub Actions workflows are configured to use GitHub Secrets for all sensitive information.
-
-For detailed information, see [Secrets Management](docs/secrets-management.md).
-
-## 📊 Monitoring & Observability
-The infrastructure includes monitoring components:
-
-- Centralized logging via Log Analytics Workspace (Azure) or OCI Logging
-- Metric collection and dashboards 
-- Alerting configuration for critical components
-
-See `terraform/modules/monitoring` for implementation details.
-
-## 🔄 CI/CD Integration
-The repository includes CI/CD pipeline configurations:
-
-- GitHub Actions workflows for testing and deployment
-- Azure DevOps pipeline example
-- Pre-commit hooks for code quality
-
-See `.github/workflows` directory for GitHub Actions configurations.
-
-## 📜 License
-
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

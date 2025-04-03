@@ -50,6 +50,42 @@ setup_vault() {
   DIR="ansible/group_vars/$ENV"
   mkdir -p "$DIR"
   
+  # Set vault password file name
+  VAULT_PASS_FILE=".vault_pass_${ENV}.txt"
+  
+  # Check if vault password file exists
+  if [ -f "$VAULT_PASS_FILE" ]; then
+    warning "Vault password file $VAULT_PASS_FILE already exists"
+    read -p "Do you want to overwrite it? (y/n) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+      echo "Operation cancelled"
+      exit 1
+    fi
+  fi
+  
+  # Get vault password
+  read -s -p "Enter a secure password for the vault: " VAULT_PASS
+  echo
+  read -s -p "Enter the vault password again: " VAULT_PASS_CONFIRM
+  echo
+
+  if [ "$VAULT_PASS" != "$VAULT_PASS_CONFIRM" ]; then
+    error "Passwords do not match"
+    exit 1
+  fi
+
+  # Save vault password
+  echo "$VAULT_PASS" > "$VAULT_PASS_FILE"
+  chmod 600 "$VAULT_PASS_FILE"
+  success "Vault password saved to $VAULT_PASS_FILE"
+
+  # Add to .gitignore if not already there
+  if ! grep -q "$VAULT_PASS_FILE" .gitignore; then
+    echo "$VAULT_PASS_FILE" >> .gitignore
+    success "Added $VAULT_PASS_FILE to .gitignore"
+  fi
+  
   # Check if vault file already exists
   VAULT_FILE="$DIR/vault.yml"
   if [ -f "$VAULT_FILE" ]; then
@@ -95,83 +131,23 @@ EOF
     ${EDITOR:-vi} "$VAULT_FILE.tmp"
   fi
   
-  # Encrypt the vault file
-  ansible-vault encrypt "$VAULT_FILE.tmp" --output="$VAULT_FILE"
+  # Encrypt the vault file using vault-id
+  ansible-vault encrypt --vault-id "$ENV@$VAULT_PASS_FILE" "$VAULT_FILE.tmp" --output="$VAULT_FILE"
   rm "$VAULT_FILE.tmp"
-  
   success "Vault file encrypted and saved to $VAULT_FILE"
   
-  # Create vault password file
-  echo ""
-  read -p "Would you like to save the vault password to a file? (y/n) " -n 1 -r
+  # Display usage instructions
   echo
-  if [[ $REPLY =~ ^[Yy]$ ]]; then
-    # Use environment-specific default name for the password file
-    if [ "$ENV" = "dev" ]; then
-      DEFAULT_PASS_FILE=".vault_pass"
-    else
-      DEFAULT_PASS_FILE=".vault_pass_$ENV"
-    fi
-    
-    read -p "Enter path for password file [$DEFAULT_PASS_FILE]: " VAULT_PASS_FILE
-    VAULT_PASS_FILE=${VAULT_PASS_FILE:-$DEFAULT_PASS_FILE}
-    
-    # Prompt for password
-    read -s -p "Enter the vault password again: " VAULT_PASS
-    echo "$VAULT_PASS" > "$VAULT_PASS_FILE"
-    chmod 600 "$VAULT_PASS_FILE"
-    echo ""
-    
-    success "Vault password saved to $VAULT_PASS_FILE"
-    echo "Add this file to your .gitignore to prevent committing it"
-    
-    # Check if .gitignore exists and add the vault password file
-    if [ -f ".gitignore" ]; then
-      if ! grep -q "$VAULT_PASS_FILE" .gitignore; then
-        echo "" >> .gitignore
-        echo "# Ansible vault password file" >> .gitignore
-        echo "$VAULT_PASS_FILE" >> .gitignore
-        success "Added $VAULT_PASS_FILE to .gitignore"
-      fi
-    fi
-  fi
-  
-  echo ""
-  echo "To edit the vault file in the future, use:"
-  echo "ansible-vault edit $VAULT_FILE"
-  echo ""
-  echo "To run playbooks with the vault:"
-  if [ -f "$VAULT_PASS_FILE" ]; then
-    echo "ansible-playbook -i ansible/inventories/$ENV/hosts.yml ansible/playbooks/deploy_azure_infra.yml --vault-password-file $VAULT_PASS_FILE"
-  else
-    echo "ansible-playbook -i ansible/inventories/$ENV/hosts.yml ansible/playbooks/deploy_azure_infra.yml --ask-vault-pass"
-  fi
+  echo "To view the vault file:"
+  echo "    ansible-vault view --vault-id $ENV@$VAULT_PASS_FILE $VAULT_FILE"
+  echo
+  echo "To edit the vault file:"
+  echo "    ansible-vault edit --vault-id $ENV@$VAULT_PASS_FILE $VAULT_FILE"
+  echo
+  echo "To run a playbook:"
+  echo "    ansible-playbook -i ansible/inventories/$ENV/hosts.yml --vault-id $ENV@$VAULT_PASS_FILE ansible/playbooks/deploy_azure_infra.yml"
 }
 
-main() {
-  # Check if Ansible is installed
-  check_ansible
-  
-  # Get environment name from command line
-  ENV="$1"
-  
-  if [ -z "$ENV" ]; then
-    echo "Usage: $0 <environment>"
-    echo "Example: $0 dev"
-    echo "Example: $0 prod"
-    echo ""
-    read -p "No environment specified. Use 'dev'? (y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-      ENV="dev"
-    else
-      exit 1
-    fi
-  fi
-  
-  # Setup vault for the specified environment
-  setup_vault "$ENV"
-}
-
-# Run main function with the first argument as environment
-main "$1" 
+# Main script execution
+check_ansible
+setup_vault "$1" 

@@ -11,14 +11,52 @@ storage_tier: "Standard_LRS"    # Free tier eligible
 databricks_sku: "standard"      # More economical than premium
 vm_size: "Standard_B1s"         # Free tier eligible
 
-# OCI resource configuration (only needed for OCI deployments)
+# Azure resource names
+azure_resource_group_name: "{{ resource_prefix }}-{{ environment }}-rg"
+azure_storage_account_name: "{{ resource_prefix }}{{ environment }}sa"
+azure_virtual_network_name: "{{ resource_prefix }}-{{ environment }}-vnet"
+azure_subnet_name: "{{ resource_prefix }}-{{ environment }}-subnet"
+azure_vm_name: "{{ resource_prefix }}-{{ environment }}-vm"
+azure_vm_os_disk_size_gb: 30
+azure_vm_admin_username: "adminuser"
+
+# Azure storage configuration
+azure_storage_account_tier: "Standard"
+azure_storage_min_tls_version: "TLS1_2"
+azure_storage_container_access_type: "private"
+
+# OCI resource configuration
 oci_region: "us-ashburn-1"      # Region with best free tier support
 compute_shape: "VM.Standard.E2.1.Micro"  # Always Free eligible shape
+oci_compartment_id: "ocid1.compartment.oc1..your-compartment-id"
 
-# SSH Key paths for OCI (only needed for OCI deployments)
-# ssh_public_key_path: "~/.ssh/id_rsa.pub"
-# ssh_private_key_path: "~/.ssh/id_rsa"
-# oci_private_key_path: "~/.oci/oci_api_key.pem"
+# OCI resource names
+oci_vcn_name: "{{ resource_prefix }}-{{ environment }}-vcn"
+oci_subnet_name: "{{ resource_prefix }}-{{ environment }}-subnet"
+oci_instance_name: "{{ resource_prefix }}-{{ environment }}-instance"
+oci_instance_ocpus: 1
+oci_instance_memory_in_gbs: 1
+oci_instance_os: "Oracle Linux"
+oci_instance_os_version: "7.9"
+
+# OCI storage configuration
+oci_storage_tier: "Standard"
+oci_storage_versioning: "Disabled"
+oci_storage_auto_tiering: "Disabled"
+oci_storage_lifecycle_days: 30
+
+# OCI compute configuration
+oci_compute_ocpus: 1
+oci_compute_memory_gb: 1
+
+# Databricks configuration
+databricks_docker_port: 8443
+databricks_docker_image: "databricks/community-edition"
+
+# Path configurations
+oci_private_key_path: "~/.oci/oci_api_key.pem"
+ssh_private_key_path: "~/.ssh/id_rsa"
+ssh_public_key_path: "~/.ssh/id_rsa.pub"
 
 # Monitoring configuration
 log_retention_days: 30
