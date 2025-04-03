@@ -87,7 +87,7 @@ We use Ansible Vault to securely store and manage credentials. This approach ens
 
 This will create an encrypted vault file where you can securely store your cloud credentials. The deployment process will automatically generate the necessary terraform.tfvars file from these credentials.
 
-For detailed information about the secure credentials management approach, see [Secrets Management Guide](docs/secrets-management.md).
+For detailed information about managing secrets and credentials, see [Secrets Management](docs/secrets-management.md).
 
 ## 🔧 Configuration Options
 
@@ -113,11 +113,12 @@ vm_size: "Standard_B1s"
 
 # Monitoring configuration
 log_retention_days: 30
-alert_email_addresses: 
+alert_email_addresses:
   - "admin@example.com"
+  - "support@example.com"
 ```
 
-2. **Encrypted Ansible Vault** (`ansible/group_vars/dev/vault.yml`) for sensitive credentials:
+2. **Encrypted Ansible Vault** (`ansible/group_vars/<environment>/vault.yml`) for sensitive credentials. A template is provided at `ansible/group_vars/all/vault.yml.example`:
 
 ```yaml
 # Azure credentials
@@ -133,6 +134,18 @@ use_service_principal: false  # true = Service Principal, false = Managed Identi
 vault_oci_tenancy_ocid: "your-tenancy-ocid"
 vault_oci_user_ocid: "your-user-ocid"
 vault_oci_fingerprint: "your-api-key-fingerprint"
+vault_oci_private_key: "your-private-key-content"
+vault_oci_ssh_private_key: |
+  -----BEGIN RSA PRIVATE KEY-----
+  Your private key content here
+  -----END RSA PRIVATE KEY-----
+
+# Database credentials
+vault_db_username: "your-database-username"
+vault_db_password: "your-database-password"
+vault_db_host: "your-database-host"
+vault_db_port: "5432"
+vault_db_name: "your-database-name"
 ```
 
 ### Advanced Settings
@@ -229,7 +242,7 @@ For Azure:
 ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_azure_infra.yml --ask-vault-pass
 
 # Or using a vault password file
-ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_azure_infra.yml --vault-password-file .vault_pass
+ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_azure_infra.yml --vault-password-file .vault_pass_dev
 ```
 
 For OCI:
@@ -238,7 +251,7 @@ For OCI:
 ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_oci_infra.yml --ask-vault-pass
 
 # Or using a vault password file
-ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_oci_infra.yml --vault-password-file .vault_pass
+ansible-playbook -i ansible/inventories/development/hosts.yml ansible/playbooks/deploy_oci_infra.yml --vault-password-file .vault_pass_dev
 ```
 
 These playbooks will:
@@ -350,13 +363,13 @@ We provide tools and documentation for secure credential management:
 
 ```sh
 # Set up Ansible Vault for secure credential storage
-./scripts/setup-vault.sh dev  # For dev environment
-./scripts/setup-vault.sh prod # For production environment
+./scripts/setup-ansible-vault.sh dev  # For dev environment
+./scripts/setup-ansible-vault.sh prod # For production environment
 ```
 
 GitHub Actions workflows are configured to use GitHub Secrets for all sensitive information.
 
-For detailed information, see [Secrets Management Guide](docs/secrets-management.md).
+For detailed information, see [Secrets Management](docs/secrets-management.md).
 
 ## 📊 Monitoring & Observability
 The infrastructure includes monitoring components:

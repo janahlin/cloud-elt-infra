@@ -52,7 +52,7 @@ fi
 # Create vault file from template
 if [ ! -f "ansible/group_vars/$ENV/vault.yml" ]; then
   echo "Creating vault variables file from template"
-  cp "ansible/group_vars/vault_template.yml" "ansible/group_vars/$ENV/vault.yml"
+  cp "ansible/group_vars/all/vault.yml.example" "ansible/group_vars/$ENV/vault.yml"
   
   # Prompt user to edit the vault file
   read -p "Would you like to edit the vault file now (y/n)? " -n 1 -r

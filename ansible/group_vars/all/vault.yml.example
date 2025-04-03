@@ -1,19 +1,41 @@
+# Vault Template and Example
+# ------------------------
+# This file serves as both a template and example for creating vault files.
+# To use this template:
+# 1. Copy this file to ansible/group_vars/[environment]/vault.yml
+# 2. Replace the placeholder values with your actual secrets
+# 3. Encrypt the file using: ansible-vault encrypt ansible/group_vars/[environment]/vault.yml
+#
+# Note: All variables in this file should be prefixed with 'vault_' to clearly indicate
+# they contain sensitive information that should be encrypted.
+
 # Azure credentials
 vault_azure_subscription_id: "your-subscription-id"
 vault_azure_tenant_id: "your-tenant-id"
 vault_azure_client_id: "your-client-id"         # Required for Service Principal auth
 vault_azure_client_secret: "your-client-secret" # Required for Service Principal auth
 
-# Authentication method for Azure
-use_service_principal: false  # Set to true to use Service Principal, false for Managed Identity
+# Authentication method
+use_service_principal: false  # true = Service Principal, false = Managed Identity
 
 # OCI credentials
 vault_oci_tenancy_ocid: "your-tenancy-ocid"
 vault_oci_user_ocid: "your-user-ocid"
 vault_oci_fingerprint: "your-api-key-fingerprint"
+vault_oci_private_key: "your-private-key-content"
 
 # SSH private key content for OCI (if needed)
 vault_oci_ssh_private_key: |
   -----BEGIN RSA PRIVATE KEY-----
   Your private key content here
-  -----END RSA PRIVATE KEY----- 
+  -----END RSA PRIVATE KEY-----
+
+# Database credentials
+vault_db_username: "your-database-username"
+vault_db_password: "your-database-password"
+vault_db_host: "your-database-host"
+vault_db_port: "5432"  # Default PostgreSQL port
+vault_db_name: "your-database-name"
+
+# Additional secrets can be added here as needed
+# Format: vault_<service>_<credential_type> 
