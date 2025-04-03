@@ -68,11 +68,17 @@ variable "vm_size" {
   default     = "Standard_D2s_v3"
 }
 
+# Define locals for provider checks
+locals {
+  is_azure = var.cloud_provider == "azure"
+  is_oci   = var.cloud_provider == "oci"
+}
+
 # Outputs
 output "instance_ip" {
   description = "IP address of the compute instance"
   value       = var.cloud_provider == "oci" ? oci_core_instance.compute[0].public_ip : (
-    var.cloud_provider == "azure" ? azurerm_public_ip.pip[0].ip_address : null
+    var.cloud_provider == "azure" ? azurerm_public_ip.public_ip[0].ip_address : null
   )
 }
 

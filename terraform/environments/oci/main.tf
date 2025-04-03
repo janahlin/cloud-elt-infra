@@ -82,3 +82,15 @@ module "compute" {
   image_id            = data.oci_core_images.oracle_linux.images[0].id
   ssh_public_key      = var.ssh_public_key
 }
+
+# Add monitoring for OCI environment
+module "monitoring" {
+  source               = "../../modules/monitoring"
+  cloud_provider       = "oci"
+  environment          = var.environment
+  resource_prefix      = var.resource_prefix
+  compartment_id       = oci_identity_compartment.compartment.id
+  compute_resource_id  = module.compute.instance_id
+  log_retention_days   = var.log_retention_days
+  alert_email_addresses = var.alert_email_addresses
+}

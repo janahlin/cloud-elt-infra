@@ -1,12 +1,4 @@
-provider "azurerm" {
-  features {}
-  subscription_id = var.azure_subscription_id
-  tenant_id       = var.azure_tenant_id
-  
-  # Only include client_id and client_secret if using Service Principal auth
-  client_id       = var.azure_client_id != "" ? var.azure_client_id : null
-  client_secret   = var.azure_client_secret != "" ? var.azure_client_secret : null
-}
+# Azure environment main configuration
 
 resource "azurerm_resource_group" "rg" {
   name     = "${var.resource_prefix}-${var.environment}-rg"
@@ -73,7 +65,7 @@ module "monitoring" {
   resource_prefix     = var.resource_prefix
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
-  compute_resource_id = module.compute.vm_id
+  compute_resource_id = module.compute.instance_id
   log_retention_days  = var.log_retention_days
   alert_email_addresses = var.alert_email_addresses
 }

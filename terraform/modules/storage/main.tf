@@ -1,3 +1,9 @@
+# Define locals for provider checks
+locals {
+  is_azure = var.cloud_provider == "azure"
+  is_oci   = var.cloud_provider == "oci"
+}
+
 # OCI Resources
 resource "oci_objectstorage_bucket" "bucket" {
   count          = var.cloud_provider == "oci" ? 1 : 0
@@ -9,9 +15,6 @@ resource "oci_objectstorage_bucket" "bucket" {
   storage_tier   = var.oci_storage_tier
   versioning     = var.oci_storage_versioning
   auto_tiering   = var.oci_storage_auto_tiering
-  
-  # Add optional lifecycle policy for free tier optimization
-  object_lifecycle_policy_etag = oci_objectstorage_object_lifecycle_policy.lifecycle_policy[0].etag
 }
 
 # Lifecycle policy to automatically clean up older objects
@@ -36,7 +39,7 @@ resource "azurerm_storage_account" "storage" {
   resource_group_name      = var.resource_group_name
   location                 = var.location
   account_tier             = var.azure_storage_account_tier
-  account_replication_type = var.storage_tier
+  account_replication_type = "LRS"
   min_tls_version          = var.azure_storage_min_tls_version
 }
 

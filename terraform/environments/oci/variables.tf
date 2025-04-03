@@ -63,3 +63,16 @@ variable "ssh_private_key_path" {
   description = "Path to SSH private key"
   type        = string
 }
+
+# Monitoring variables
+variable "log_retention_days" {
+  description = "Number of days to retain logs"
+  type        = number
+  default     = 30
+}
+
+variable "alert_email_addresses" {
+  description = "Email addresses for alerts"
+  type        = list(string)
+  default     = []
+}

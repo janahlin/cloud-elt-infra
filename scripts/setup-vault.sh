@@ -30,6 +30,9 @@ if ! command -v ansible-vault &> /dev/null; then
   exit 1
 fi
 
+# Set Ansible config path
+export ANSIBLE_CONFIG="$(pwd)/ansible/ansible.cfg"
+
 # Set up environment
 ENV="${1:-dev}"
 title "Setting up Ansible Vault for $ENV environment"

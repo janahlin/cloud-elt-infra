@@ -68,3 +68,27 @@ variable "ssh_private_key_path" {
   type        = string
   default     = ""
 }
+
+variable "databricks_docker_port" {
+  description = "Port for Databricks Docker container"
+  type        = number
+  default     = 8443
+}
+
+variable "databricks_docker_image" {
+  description = "Docker image for Databricks"
+  type        = string
+  default     = "databricks/community-edition"
+}
+
+variable "oci_compute_ocpus" {
+  description = "Number of OCPUs for OCI databricks instance"
+  type        = number
+  default     = 1
+}
+
+variable "oci_compute_memory_gb" {
+  description = "Memory in GB for OCI databricks instance"
+  type        = number
+  default     = 1
+}

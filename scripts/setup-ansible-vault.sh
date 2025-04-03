@@ -38,6 +38,9 @@ check_ansible() {
   success "Ansible is installed"
 }
 
+# Set Ansible config path
+export ANSIBLE_CONFIG="$(pwd)/ansible/ansible.cfg"
+
 setup_vault() {
   ENV="$1"
   if [ -z "$ENV" ]; then

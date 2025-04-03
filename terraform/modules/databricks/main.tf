@@ -1,3 +1,9 @@
+# Define locals for provider checks
+locals {
+  is_azure = var.cloud_provider == "azure"
+  is_oci   = var.cloud_provider == "oci"
+}
+
 # OCI resources
 resource "oci_core_instance" "databricks" {
   count               = local.is_oci ? 1 : 0

@@ -39,6 +39,25 @@ variable "subnet_count" {
   default     = 3
 }
 
+# Test variables
+variable "test_resource_name" {
+  description = "Test resource name"
+  type        = string
+  default     = ""
+}
+
+variable "test_complex_name" {
+  description = "Test complex name"
+  type        = string
+  default     = ""
+}
+
+variable "test_number" {
+  description = "Test number"
+  type        = number
+  default     = 0
+}
+
 # Azure specific variables
 variable "azure_subscription_id" {
   description = "Azure Subscription ID"
@@ -72,6 +91,54 @@ variable "azure_location" {
   description = "Azure region for resources"
   type        = string
   default     = "eastus2"
+}
+
+variable "azure_resource_group_name" {
+  description = "Resource group name"
+  type        = string
+  default     = ""
+}
+
+variable "azure_storage_account_name" {
+  description = "Storage account name"
+  type        = string
+  default     = ""
+}
+
+variable "azure_virtual_network_name" {
+  description = "Virtual network name"
+  type        = string
+  default     = ""
+}
+
+variable "azure_subnet_name" {
+  description = "Subnet name"
+  type        = string
+  default     = ""
+}
+
+variable "azure_vm_name" {
+  description = "VM name"
+  type        = string
+  default     = ""
+}
+
+variable "azure_vm_size" {
+  description = "VM size"
+  type        = string
+  default     = "Standard_B1s"
+}
+
+variable "azure_vm_os_disk_size_gb" {
+  description = "VM OS disk size in GB"
+  type        = number
+  default     = 30
+}
+
+variable "azure_vm_admin_username" {
+  description = "VM admin username"
+  type        = string
+  default     = "adminuser"
 }
 
 variable "storage_tier" {
@@ -126,10 +193,58 @@ variable "oci_region" {
   default     = "us-ashburn-1"
 }
 
+variable "oci_compartment_id" {
+  description = "OCI compartment ID"
+  type        = string
+  default     = ""
+}
+
+variable "oci_vcn_name" {
+  description = "OCI VCN name"
+  type        = string
+  default     = ""
+}
+
+variable "oci_subnet_name" {
+  description = "OCI subnet name"
+  type        = string
+  default     = ""
+}
+
+variable "oci_instance_name" {
+  description = "OCI instance name"
+  type        = string
+  default     = ""
+}
+
 variable "compute_shape" {
   description = "OCI compute shape"
   type        = string
   default     = "VM.Standard.E2.1.Micro"
+}
+
+variable "oci_instance_ocpus" {
+  description = "Number of OCPUs for OCI instance"
+  type        = number
+  default     = 1
+}
+
+variable "oci_instance_memory_in_gbs" {
+  description = "Memory in GBs for OCI instance"
+  type        = number
+  default     = 1
+}
+
+variable "oci_instance_os" {
+  description = "OS for OCI instance"
+  type        = string
+  default     = "Oracle Linux"
+}
+
+variable "oci_instance_os_version" {
+  description = "OS version for OCI instance"
+  type        = string
+  default     = "8"
 }
 
 variable "ssh_public_key" {
@@ -222,6 +337,6 @@ variable "log_retention_days" {
 
 variable "alert_email_addresses" {
   description = "Email addresses for alerts"
-  type        = list(string)
-  default     = []
+  type        = string
+  default     = ""
 }

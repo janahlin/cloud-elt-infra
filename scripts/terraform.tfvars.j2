@@ -1,0 +1,69 @@
+# Common variables
+cloud_provider = "{{ cloud_provider }}"
+environment = "{{ env_name }}"
+resource_prefix = "{{ resource_prefix }}"
+vpc_cidr = "{{ vpc_cidr }}"
+subnet_count = {{ subnet_count }}
+
+# Test variables
+test_resource_name = "{{ test_resource_name | default('') }}"
+test_complex_name = "{{ test_complex_name | default('') }}"
+test_number = {{ test_number | default(0) }}
+
+# Azure specific variables
+azure_subscription_id = "{{ vault_azure_subscription_id | default('') }}"
+azure_client_id = "{{ vault_azure_client_id | default('') }}"
+azure_client_secret = "{{ vault_azure_client_secret | default('') }}"
+azure_tenant_id = "{{ vault_azure_tenant_id | default('') }}"
+azure_location = "{{ azure_location }}"
+azure_resource_group_name = "{{ azure_resource_group_name }}"
+azure_storage_account_name = "{{ azure_storage_account_name }}"
+azure_virtual_network_name = "{{ azure_virtual_network_name }}"
+azure_subnet_name = "{{ azure_subnet_name }}"
+azure_vm_name = "{{ azure_vm_name }}"
+azure_vm_size = "{{ vm_size }}"
+azure_vm_os_disk_size_gb = {{ azure_vm_os_disk_size_gb }}
+azure_vm_admin_username = "{{ azure_vm_admin_username }}"
+storage_tier = "{{ storage_tier }}"
+databricks_sku = "{{ databricks_sku }}"
+
+# Azure storage configuration
+azure_storage_account_tier = "{{ azure_storage_account_tier }}"
+azure_storage_min_tls_version = "{{ azure_storage_min_tls_version }}"
+azure_storage_container_access_type = "{{ azure_storage_container_access_type }}"
+
+# OCI specific variables
+oci_tenancy_ocid = "{{ vault_oci_tenancy_ocid | default('') }}"
+oci_user_ocid = "{{ vault_oci_user_ocid | default('') }}"
+oci_fingerprint = "{{ vault_oci_fingerprint | default('') }}"
+oci_private_key_path = "{{ oci_private_key_path }}"
+oci_region = "{{ oci_region }}"
+oci_compartment_id = "{{ oci_compartment_id }}"
+oci_vcn_name = "{{ oci_vcn_name }}"
+oci_subnet_name = "{{ oci_subnet_name }}"
+oci_instance_name = "{{ oci_instance_name }}"
+compute_shape = "{{ compute_shape }}"
+oci_instance_ocpus = {{ oci_instance_ocpus }}
+oci_instance_memory_in_gbs = {{ oci_instance_memory_in_gbs }}
+oci_instance_os = "{{ oci_instance_os }}"
+oci_instance_os_version = "{{ oci_instance_os_version }}"
+ssh_public_key = "{{ lookup('file', ssh_public_key_path) }}"
+ssh_private_key_path = "{{ ssh_private_key_path }}"
+
+# OCI storage configuration
+oci_storage_tier = "{{ oci_storage_tier }}"
+oci_storage_versioning = "{{ oci_storage_versioning }}"
+oci_storage_auto_tiering = "{{ oci_storage_auto_tiering }}"
+oci_storage_lifecycle_days = {{ oci_storage_lifecycle_days }}
+
+# OCI compute configuration
+oci_compute_ocpus = {{ oci_compute_ocpus }}
+oci_compute_memory_gb = {{ oci_compute_memory_gb }}
+
+# Databricks configuration
+databricks_docker_port = {{ databricks_docker_port }}
+databricks_docker_image = "{{ databricks_docker_image }}"
+
+# Monitoring configuration
+log_retention_days = {{ log_retention_days }}
+alert_email_addresses = "{{ alert_email_addresses }}"

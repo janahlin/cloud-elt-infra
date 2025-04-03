@@ -13,20 +13,31 @@ This document describes the testing framework for the cloud-elt-infra project. T
 ### test-playbook.sh
 
 This script tests Ansible playbooks with the following features:
-- Syntax checking
-- Linting
-- Dry-run execution
-- Full execution with verification
+- Creates an isolated test environment
+- Generates a minimal test playbook
+- Sets up necessary variable files
+- Runs playbook in test mode
+- Cleans up test environment
+
+It avoids common Ansible issues:
+- Handles the `environment` reserved variable name conflict by using `env_name` instead
+- Prevents recursive template errors with simple Jinja2 expressions
+- Avoids vault password file issues with a simplified test setup
 
 Usage:
 ```bash
-./scripts/test-playbook.sh <environment> [plan|apply]
+./scripts/test-playbook.sh <environment> [check|apply]
 ```
 
 Example:
 ```bash
-./scripts/test-playbook.sh dev plan
+./scripts/test-playbook.sh dev check
 ```
+
+The script creates:
+- A temporary inventory with localhost as controller
+- Basic variable files with environment-specific values
+- A simple test playbook that verifies Ansible functionality
 
 ### test-terraform.sh
 
@@ -123,8 +134,8 @@ ansible-vault view --vault-id dev@.vault_pass_dev.txt ansible/group_vars/dev/vau
 
 Required environment variables:
 - `CLOUD_PROVIDER` - Azure or OCI
-- `ENVIRONMENT` - dev or prod
-- `VAULT_PASSWORD_FILE` - Path to vault password file
+- `ENVIRONMENT` or `env_name` - dev or prod
+- `ANSIBLE_VAULT_PASSWORD_FILE` or `ANSIBLE_VAULT_ID_LIST` - Path to vault password file(s)
 
 ## Best Practices
 
@@ -141,7 +152,7 @@ Required environment variables:
 
 1. Missing Vault Password File
    - Error: "Vault password file not found"
-   - Solution: Run `setup-ansible-vault.sh` for your environment
+   - Solution: Run `setup-ansible-vault.sh` for your environment or set `CREATED_TEMP_VAULT=true` in the script
 
 2. Vault Decryption Error
    - Error: "Decryption failed"
@@ -154,6 +165,22 @@ Required environment variables:
 4. Cloud Provider Authentication
    - Error: "Authentication failed"
    - Solution: Verify credentials in vault file
+
+5. Environment Variable Conflicts
+   - Error: "An unhandled exception occurred while templating '{{ environment }}'... recursive loop detected"
+   - Solution: Use `env_name` instead of `environment` in Ansible templates and variables, as `environment` is a reserved Ansible variable
+
+6. Terraform Module Reference Errors
+   - Error: "Reference to undeclared module"
+   - Solution: Use the correct module references with for_each: `module.azure_environment["azure"]` instead of `module.azure_environment[*]`
+
+7. Storage Account Replication Type Error
+   - Error: "Expected account_replication_type to be one of ['LRS', 'ZRS', ...]"
+   - Solution: Make sure to use just the replication type (e.g., "LRS") without the account tier prefix
+
+8. Local Variable Errors in Modules
+   - Error: "Reference to undeclared local value"
+   - Solution: Add missing `locals` blocks in module files with provider-specific logic
 
 ### Getting Help
 

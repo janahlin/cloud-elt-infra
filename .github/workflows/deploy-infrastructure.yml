@@ -113,10 +113,11 @@ jobs:
             - "${{ secrets.NOTIFICATION_EMAIL }}"
           EOF
           
-          echo "${{ secrets.VAULT_PASSWORD }}" > .vault_pass.txt
-          chmod 600 .vault_pass.txt
+          # Create environment-specific vault password file
+          echo "${{ secrets.VAULT_PASSWORD }}" > .vault_pass_${{ github.event.inputs.environment || 'dev' }}.txt
+          chmod 600 .vault_pass_${{ github.event.inputs.environment || 'dev' }}.txt
           
-          ansible-vault encrypt --vault-password-file .vault_pass.txt ansible/group_vars/${{ github.event.inputs.environment || 'dev' }}/vault.yml
+          ansible-vault encrypt --vault-id ${{ github.event.inputs.environment || 'dev' }}@.vault_pass_${{ github.event.inputs.environment || 'dev' }}.txt ansible/group_vars/${{ github.event.inputs.environment || 'dev' }}/vault.yml
 
       - name: Terraform Init
         run: |
@@ -193,10 +194,11 @@ jobs:
             - "${{ secrets.NOTIFICATION_EMAIL }}"
           EOF
           
-          echo "${{ secrets.VAULT_PASSWORD }}" > .vault_pass.txt
-          chmod 600 .vault_pass.txt
+          # Create environment-specific vault password file
+          echo "${{ secrets.VAULT_PASSWORD }}" > .vault_pass_${{ github.event.inputs.environment || 'dev' }}.txt
+          chmod 600 .vault_pass_${{ github.event.inputs.environment || 'dev' }}.txt
           
-          ansible-vault encrypt --vault-password-file .vault_pass.txt ansible/group_vars/${{ github.event.inputs.environment || 'dev' }}/vault.yml
+          ansible-vault encrypt --vault-id ${{ github.event.inputs.environment || 'dev' }}@.vault_pass_${{ github.event.inputs.environment || 'dev' }}.txt ansible/group_vars/${{ github.event.inputs.environment || 'dev' }}/vault.yml
 
       - name: Download Terraform plan
         uses: actions/download-artifact@v3
@@ -223,5 +225,5 @@ jobs:
       - name: Run Ansible for Post-Deployment Configuration
         run: |
           ansible-playbook -i ansible/inventories/${{ github.event.inputs.environment || 'dev' }}/hosts.yml \
-            --vault-password-file .vault_pass.txt \
+            --vault-id ${{ github.event.inputs.environment || 'dev' }}@.vault_pass_${{ github.event.inputs.environment || 'dev' }}.txt \
             ansible/playbooks/setup_controller.yml 

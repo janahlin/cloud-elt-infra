@@ -5,6 +5,11 @@ resource_prefix: "elt"
 vpc_cidr: "10.0.0.0/16"
 subnet_count: 3
 
+# Test variables with interpolation
+test_resource_name: "{{ resource_prefix }}-{{ environment }}-test"
+test_complex_name: "{{ resource_prefix }}-{{ environment }}-{{ cloud_provider }}-test"
+test_number: "{{ subnet_count + 1 }}"
+
 # Azure resource configuration
 azure_location: "eastus2"
 storage_tier: "Standard_LRS"    # Free tier eligible
@@ -28,7 +33,7 @@ azure_storage_container_access_type: "private"
 # OCI resource configuration
 oci_region: "us-ashburn-1"      # Region with best free tier support
 compute_shape: "VM.Standard.E2.1.Micro"  # Always Free eligible shape
-oci_compartment_id: "ocid1.compartment.oc1..your-compartment-id"
+oci_compartment_id: "ocid1.compartment.oc1..example"
 
 # OCI resource names
 oci_vcn_name: "{{ resource_prefix }}-{{ environment }}-vcn"
@@ -37,12 +42,12 @@ oci_instance_name: "{{ resource_prefix }}-{{ environment }}-instance"
 oci_instance_ocpus: 1
 oci_instance_memory_in_gbs: 1
 oci_instance_os: "Oracle Linux"
-oci_instance_os_version: "7.9"
+oci_instance_os_version: "8"
 
 # OCI storage configuration
 oci_storage_tier: "Standard"
-oci_storage_versioning: "Disabled"
-oci_storage_auto_tiering: "Disabled"
+oci_storage_versioning: "Enabled"
+oci_storage_auto_tiering: "Enabled"
 oci_storage_lifecycle_days: 30
 
 # OCI compute configuration
@@ -60,5 +65,4 @@ ssh_public_key_path: "~/.ssh/id_rsa.pub"
 
 # Monitoring configuration
 log_retention_days: 30
-alert_email_addresses:
-  - "jan.ahlin@gmail.com"
+alert_email_addresses: "jan.ahlin@gmail.com"

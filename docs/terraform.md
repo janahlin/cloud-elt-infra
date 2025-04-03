@@ -185,6 +185,52 @@ terraform apply -var-file=terraform.tfvars
    - Verify cloud provider credentials
    - Check resource quotas and limits
 
+4. **Module reference errors**
+   - Error: `Error: Reference to undeclared module`
+   - Solution: When using conditional modules with `for_each`, reference them correctly:
+     ```hcl
+     # CORRECT:
+     module.azure_environment["azure"].resource_group_name
+     
+     # INCORRECT:
+     module.azure_environment[*].resource_group_name
+     ```
+
+5. **Storage account replication type errors**
+   - Error: `Error: expected storage_account_replication_type to be one of [LRS ZRS GRS RAGRS], got Standard_LRS`
+   - Solution: Use only the replication suffix without the tier prefix
+     ```hcl
+     # CORRECT:
+     storage_account_replication_type = "LRS"
+     
+     # INCORRECT:
+     storage_account_replication_type = "Standard_LRS"
+     ```
+
+6. **Local variable errors**
+   - Error: `Error: Reference to undeclared local value`
+   - Solution: Ensure each module has its required locals block:
+     ```hcl
+     locals {
+       resource_name = "${var.prefix}-${var.environment}-resource"
+     }
+     ```
+
+7. **Output reference errors**
+   - Error: `Error: Unsupported attribute`
+   - Solution: Use conditional expressions for outputs from conditional modules:
+     ```hcl
+     output "deployed_infrastructure" {
+       value = var.cloud_provider == "azure" ? {
+         resource_group = module.azure_environment["azure"].resource_group_name
+         # other azure outputs
+       } : {
+         compartment = module.oci_environment["oci"].compartment_id
+         # other oci outputs
+       }
+     }
+     ```
+
 ### Getting Help
 
 For additional help:
