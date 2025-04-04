@@ -12,4 +12,4 @@ external-sources=true
 shell=bash
 
 # Ignore certain files matching these globs
-exclude=*.zsh 
+exclude=*.zsh

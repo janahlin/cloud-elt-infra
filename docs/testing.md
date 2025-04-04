@@ -192,4 +192,4 @@ Required environment variables:
 
 - [Ansible Vault Documentation](https://docs.ansible.com/ansible/latest/user_guide/vault.html)
 - [Terraform Testing Documentation](https://www.terraform.io/docs/testing/index.html)
-- [Cloud Provider Documentation](https://docs.microsoft.com/en-us/azure/) / [OCI Documentation](https://docs.cloud.oracle.com/) 
+- [Cloud Provider Documentation](https://docs.microsoft.com/en-us/azure/) / [OCI Documentation](https://docs.cloud.oracle.com/)

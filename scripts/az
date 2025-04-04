@@ -1,0 +1,12 @@
+#!/bin/bash
+# Wrapper script for Azure CLI
+
+AZURE_VENV="$PWD/cloud_venvs/azure"
+
+if [ ! -d "$AZURE_VENV" ]; then
+  echo "Azure CLI environment not found. Setting it up now..."
+  ./scripts/setup-azure-cli.sh
+fi
+
+# Run Azure CLI from the dedicated environment
+"$AZURE_VENV/bin/az" "$@"

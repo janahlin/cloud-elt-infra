@@ -44,4 +44,4 @@ ignore: |
   .git/
   venv/
   .github/workflows/
-  ansible/inventories/ 
+  ansible/inventories/

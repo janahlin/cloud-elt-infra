@@ -11,7 +11,7 @@ resource "oci_core_instance" "databricks" {
   compartment_id      = var.compartment_id
   display_name        = "${var.resource_prefix}-${var.environment}-databricks"
   shape               = var.compute_shape
-  
+
   # Compute resources
   shape_config {
     ocpus         = var.oci_compute_ocpus

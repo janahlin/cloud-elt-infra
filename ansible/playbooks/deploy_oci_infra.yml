@@ -24,7 +24,7 @@
   # Include vault-encrypted variables
   vars_files:
     - "../group_vars/{{ environment | default('dev') }}/vault.yml"
-  
+
   tasks:
     - name: Generate terraform.tfvars from template
       template:
@@ -32,6 +32,6 @@
         dest: "{{ terraform_dir }}/terraform.tfvars"
         mode: '0600'
       no_log: true  # Prevents logging of sensitive data
-  
+
   roles:
     - infrastructure_deploy

@@ -42,7 +42,7 @@ echo "Detected OS: $OS"
 # Check if running in virtual environment
 check_venv() {
   title "Checking virtual environment"
-  
+
   if [ -z "$VIRTUAL_ENV" ]; then
     warning "Not running in a Python virtual environment."
     warning "It's strongly recommended to install Python linters in a virtual environment."
@@ -50,7 +50,7 @@ check_venv() {
     warning "  ./scripts/setup-venv.sh"
     warning "  source venv/bin/activate  # Linux/macOS"
     warning "  venv\\Scripts\\activate     # Windows"
-    
+
     read -p "Continue without a virtual environment? (y/n) " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -65,12 +65,12 @@ check_venv() {
 # Install TFLint
 install_tflint() {
   title "Installing TFLint (Terraform Linter)"
-  
+
   if command -v tflint &> /dev/null; then
     warning "TFLint is already installed, skipping installation."
     return
   fi
-  
+
   if [[ "$OS" == "macOS" ]]; then
     echo "Installing TFLint using Homebrew..."
     brew install tflint
@@ -78,7 +78,7 @@ install_tflint() {
     echo "Installing TFLint using the official installer..."
     curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
   fi
-  
+
   if command -v tflint &> /dev/null; then
     success "TFLint installed successfully. Version: $(tflint --version)"
   else
@@ -89,15 +89,15 @@ install_tflint() {
 # Install ansible-lint
 install_ansible_lint() {
   title "Installing ansible-lint (Ansible Linter)"
-  
+
   if command -v ansible-lint &> /dev/null; then
     warning "ansible-lint is already installed, skipping installation."
     return
   fi
-  
+
   echo "Installing ansible-lint using pip..."
   pip install "ansible-lint>=6.0.0,<7.0.0"
-  
+
   if command -v ansible-lint &> /dev/null; then
     success "ansible-lint installed successfully. Version: $(ansible-lint --version | head -n 1)"
   else
@@ -108,15 +108,15 @@ install_ansible_lint() {
 # Install pylint
 install_pylint() {
   title "Installing pylint (Python Linter)"
-  
+
   if command -v pylint &> /dev/null; then
     warning "pylint is already installed, skipping installation."
     return
   fi
-  
+
   echo "Installing pylint using pip..."
   pip install "pylint>=2.12.0"
-  
+
   if command -v pylint &> /dev/null; then
     success "pylint installed successfully. Version: $(pylint --version | head -n 1)"
   else
@@ -127,12 +127,12 @@ install_pylint() {
 # Install shellcheck
 install_shellcheck() {
   title "Installing shellcheck (Shell Script Linter)"
-  
+
   if command -v shellcheck &> /dev/null; then
     warning "shellcheck is already installed, skipping installation."
     return
   fi
-  
+
   if [[ "$OS" == "macOS" ]]; then
     echo "Installing shellcheck using Homebrew..."
     brew install shellcheck
@@ -149,7 +149,7 @@ install_shellcheck() {
     warning "Visit: https://github.com/koalaman/shellcheck#installing"
     return
   fi
-  
+
   if command -v shellcheck &> /dev/null; then
     success "shellcheck installed successfully. Version: $(shellcheck --version | grep version)"
   else
@@ -160,15 +160,15 @@ install_shellcheck() {
 # Install yamllint
 install_yamllint() {
   title "Installing yamllint (YAML Linter)"
-  
+
   if command -v yamllint &> /dev/null; then
     warning "yamllint is already installed, skipping installation."
     return
   fi
-  
+
   echo "Installing yamllint using pip..."
   pip install "yamllint>=1.26.0"
-  
+
   if command -v yamllint &> /dev/null; then
     success "yamllint installed successfully. Version: $(yamllint --version)"
   else
@@ -180,20 +180,20 @@ install_yamllint() {
 main() {
   # Check if running in virtual environment
   check_venv
-  
+
   install_tflint
   install_ansible_lint
   install_pylint
   install_shellcheck
   install_yamllint
-  
+
   echo ""
   title "Installation Complete"
   success "All linters have been installed successfully!"
   echo ""
   echo "You can now run the linters using:"
   echo "  ./scripts/run-linters.sh"
-  
+
   if [ -n "$VIRTUAL_ENV" ]; then
     echo ""
     echo "Note: These linters are installed in your current virtual environment."
@@ -204,4 +204,4 @@ main() {
 }
 
 # Run main function
-main 
+main

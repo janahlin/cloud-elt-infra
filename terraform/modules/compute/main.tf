@@ -77,14 +77,14 @@ locals {
 # Outputs
 output "instance_ip" {
   description = "IP address of the compute instance"
-  value       = var.cloud_provider == "oci" ? oci_core_instance.compute[0].public_ip : (
+  value = var.cloud_provider == "oci" ? oci_core_instance.compute[0].public_ip : (
     var.cloud_provider == "azure" ? azurerm_public_ip.public_ip[0].ip_address : null
   )
 }
 
 output "instance_id" {
   description = "ID of the compute instance"
-  value       = var.cloud_provider == "oci" ? oci_core_instance.compute[0].id : (
+  value = var.cloud_provider == "oci" ? oci_core_instance.compute[0].id : (
     var.cloud_provider == "azure" ? azurerm_linux_virtual_machine.vm[0].id : null
   )
 }
@@ -98,8 +98,8 @@ resource "oci_core_instance" "compute" {
   shape               = var.compute_shape # VM.Standard.E2.1.Micro for Always Free Tier
 
   shape_config {
-    ocpus         = 1    # Free tier limited to 1 OCPU
-    memory_in_gbs = 1    # Free tier limited to 1 GB RAM
+    ocpus         = 1 # Free tier limited to 1 OCPU
+    memory_in_gbs = 1 # Free tier limited to 1 GB RAM
   }
 
   create_vnic_details {
@@ -173,7 +173,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
     sku       = "18.04-LTS"
     version   = "latest"
   }
-  
+
   boot_diagnostics {
     storage_account_uri = null
   }
@@ -191,14 +191,14 @@ resource "oci_core_volume_backup_policy_assignment" "boot_volume_backup_policy" 
 }
 
 data "oci_core_boot_volume_attachments" "boot_volume_attachments" {
-  count          = local.is_oci ? 1 : 0
+  count               = local.is_oci ? 1 : 0
   availability_domain = var.availability_domain
-  compartment_id = var.compartment_id
-  instance_id    = oci_core_instance.compute[0].id
+  compartment_id      = var.compartment_id
+  instance_id         = oci_core_instance.compute[0].id
 }
 
 data "oci_core_volume_backup_policies" "boot_volume_backup_policies" {
-  count          = local.is_oci ? 1 : 0
+  count = local.is_oci ? 1 : 0
   filter {
     name   = "display_name"
     values = ["silver"]

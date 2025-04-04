@@ -2,10 +2,10 @@ provider "azurerm" {
   features {}
   subscription_id = var.azure_subscription_id
   tenant_id       = var.azure_tenant_id
-  
+
   # Only include client_id and client_secret if using Service Principal auth
-  client_id       = var.azure_client_id != "" ? var.azure_client_id : null
-  client_secret   = var.azure_client_secret != "" ? var.azure_client_secret : null
+  client_id     = var.azure_client_id != "" ? var.azure_client_id : null
+  client_secret = var.azure_client_secret != "" ? var.azure_client_secret : null
 }
 
 resource "azurerm_resource_group" "rg" {
@@ -67,13 +67,13 @@ module "compute" {
 
 # New monitoring module
 module "monitoring" {
-  source              = "../../modules/monitoring"
-  cloud_provider      = "azure"
-  environment         = var.environment
-  resource_prefix     = var.resource_prefix
-  location            = var.location
-  resource_group_name = azurerm_resource_group.rg.name
-  compute_resource_id = module.compute.vm_id
-  log_retention_days  = var.log_retention_days
+  source                = "../../modules/monitoring"
+  cloud_provider        = "azure"
+  environment           = var.environment
+  resource_prefix       = var.resource_prefix
+  location              = var.location
+  resource_group_name   = azurerm_resource_group.rg.name
+  compute_resource_id   = module.compute.instance_id
+  log_retention_days    = var.log_retention_days
   alert_email_addresses = var.alert_email_addresses
 }

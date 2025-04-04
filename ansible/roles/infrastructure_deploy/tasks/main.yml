@@ -4,7 +4,7 @@
     src: terraform.tfvars.j2
     dest: "{{ terraform_dir }}/terraform.tfvars"
     mode: 0644
-  
+
 - name: Run terraform init
   command:
     cmd: terraform init
@@ -20,7 +20,7 @@
     cmd: terraform plan -out=tfplan
     chdir: "{{ terraform_dir }}"
   register: tf_plan_result
-  
+
 - name: Display terraform plan results
   debug:
     var: tf_plan_result.stdout_lines

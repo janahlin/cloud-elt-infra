@@ -17,4 +17,4 @@ azure_cross_region_restore: false
 # OCI specific
 oci_backup_vault_type: "DEFAULT"
 oci_backup_policy: "bronze"
-oci_cross_region_copy: false 
+oci_cross_region_copy: false

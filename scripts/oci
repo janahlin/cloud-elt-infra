@@ -1,0 +1,12 @@
+#!/bin/bash
+# Wrapper script for OCI CLI
+
+OCI_VENV="$PWD/cloud_venvs/oci"
+
+if [ ! -d "$OCI_VENV" ]; then
+  echo "OCI CLI environment not found. Setting it up now..."
+  ./scripts/setup-oci-cli.sh
+fi
+
+# Run OCI CLI from the dedicated environment
+"$OCI_VENV/bin/oci" "$@"

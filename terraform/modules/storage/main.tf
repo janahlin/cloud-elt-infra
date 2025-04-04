@@ -10,19 +10,19 @@ resource "oci_objectstorage_bucket" "bucket" {
   compartment_id = var.compartment_id
   name           = "${var.resource_prefix}-${var.environment}-bucket"
   namespace      = var.object_storage_namespace
-  
+
   # Storage settings
-  storage_tier   = var.oci_storage_tier
-  versioning     = var.oci_storage_versioning
-  auto_tiering   = var.oci_storage_auto_tiering
+  storage_tier = var.oci_storage_tier
+  versioning   = var.oci_storage_versioning
+  auto_tiering = var.oci_storage_auto_tiering
 }
 
 # Lifecycle policy to automatically clean up older objects
 resource "oci_objectstorage_object_lifecycle_policy" "lifecycle_policy" {
-  count        = var.cloud_provider == "oci" ? 1 : 0
-  bucket       = oci_objectstorage_bucket.bucket[0].name
-  namespace    = var.object_storage_namespace
-  
+  count     = var.cloud_provider == "oci" ? 1 : 0
+  bucket    = oci_objectstorage_bucket.bucket[0].name
+  namespace = var.object_storage_namespace
+
   rules {
     action      = "DELETE"
     is_enabled  = true

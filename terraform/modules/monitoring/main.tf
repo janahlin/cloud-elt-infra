@@ -51,7 +51,7 @@ resource "azurerm_monitor_metric_alert" "high_cpu" {
   resource_group_name = var.resource_group_name
   scopes              = [var.compute_resource_id]
   description         = "Alert when CPU exceeds 80%"
-  
+
   criteria {
     metric_namespace = "Microsoft.Compute/virtualMachines"
     metric_name      = "Percentage CPU"
@@ -83,17 +83,17 @@ resource "oci_monitoring_alarm" "high_cpu_alarm" {
   compartment_id = var.compartment_id
   display_name   = "${var.resource_prefix}-${var.environment}-highcpu-alarm"
   is_enabled     = true
-  
+
   metric_compartment_id = var.compartment_id
   namespace             = "oci_computeagent"
   resource_group        = "${var.resource_prefix}-${var.environment}"
   query                 = "CpuUtilization[1m].mean() > 80"
   severity              = "CRITICAL"
-  
+
   message_format = "ONS_OPTIMIZED"
-  
+
   destinations = var.notification_topic_ids
-  
+
   body = "High CPU utilization detected on compute instance"
 }
 
@@ -107,9 +107,9 @@ resource "oci_ons_notification_topic" "alert_topic" {
 
 # OCI Notifications Subscription for email
 resource "oci_ons_subscription" "email_subscription" {
-  count               = local.is_oci && length(var.notification_topic_ids) == 0 ? length(var.alert_email_addresses) : 0
-  compartment_id      = var.compartment_id
-  topic_id            = oci_ons_notification_topic.alert_topic[0].id
-  endpoint            = var.alert_email_addresses[count.index]
-  protocol            = "EMAIL"
-} 
+  count          = local.is_oci && length(var.notification_topic_ids) == 0 ? length(var.alert_email_addresses) : 0
+  compartment_id = var.compartment_id
+  topic_id       = oci_ons_notification_topic.alert_topic[0].id
+  endpoint       = var.alert_email_addresses[count.index]
+  protocol       = "EMAIL"
+}

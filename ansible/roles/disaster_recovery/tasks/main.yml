@@ -25,4 +25,4 @@
     hour: "*/6"
     job: "/opt/cloud-elt-infra/scripts/backup_monitoring.sh"
     state: present
-  when: dr_enabled | bool 
+  when: dr_enabled | bool

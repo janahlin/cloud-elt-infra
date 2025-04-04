@@ -30,11 +30,11 @@ check_ansible() {
   if ! command -v ansible &> /dev/null; then
     error "Ansible is required but not found. Please install Ansible or run setup-venv.sh first."
   fi
-  
+
   if ! command -v ansible-vault &> /dev/null; then
     error "ansible-vault command not found. Please check your Ansible installation."
   fi
-  
+
   success "Ansible is installed"
 }
 
@@ -46,16 +46,16 @@ setup_vault() {
   if [ -z "$ENV" ]; then
     ENV="dev"
   fi
-  
+
   title "Setting up Ansible Vault for $ENV environment"
-  
+
   # Create directory structure
   DIR="ansible/group_vars/$ENV"
   mkdir -p "$DIR"
-  
+
   # Set vault password file name
   VAULT_PASS_FILE=".vault_pass_${ENV}.txt"
-  
+
   # Check if vault password file exists
   if [ -f "$VAULT_PASS_FILE" ]; then
     warning "Vault password file $VAULT_PASS_FILE already exists"
@@ -66,7 +66,7 @@ setup_vault() {
       exit 1
     fi
   fi
-  
+
   # Get vault password
   read -s -p "Enter a secure password for the vault: " VAULT_PASS
   echo
@@ -88,7 +88,7 @@ setup_vault() {
     echo "$VAULT_PASS_FILE" >> .gitignore
     success "Added $VAULT_PASS_FILE to .gitignore"
   fi
-  
+
   # Check if vault file already exists
   VAULT_FILE="$DIR/vault.yml"
   if [ -f "$VAULT_FILE" ]; then
@@ -100,7 +100,7 @@ setup_vault() {
       exit 0
     fi
   fi
-  
+
   # Copy example file if it exists
   if [ -f "ansible/group_vars/all/vault.yml.example" ]; then
     cp "ansible/group_vars/all/vault.yml.example" "$VAULT_FILE.tmp"
@@ -124,7 +124,7 @@ vault_oci_fingerprint: ""
 EOF
     success "Created vault file template"
   fi
-  
+
   # Prompt to edit the vault file
   echo ""
   echo "Now you need to edit the vault file and add your credentials."
@@ -133,12 +133,12 @@ EOF
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     ${EDITOR:-vi} "$VAULT_FILE.tmp"
   fi
-  
+
   # Encrypt the vault file using vault-id
   ansible-vault encrypt --vault-id "$ENV@$VAULT_PASS_FILE" "$VAULT_FILE.tmp" --output="$VAULT_FILE"
   rm "$VAULT_FILE.tmp"
   success "Vault file encrypted and saved to $VAULT_FILE"
-  
+
   # Display usage instructions
   echo
   echo "To view the vault file:"
@@ -153,4 +153,4 @@ EOF
 
 # Main script execution
 check_ansible
-setup_vault "$1" 
+setup_vault "$1"

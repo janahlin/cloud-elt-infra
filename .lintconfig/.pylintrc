@@ -88,4 +88,4 @@ variable-naming-style = snake_case
 
 [IMPORTS]
 # Allow wildcard imports from modules that define __all__
-allow-wildcard-with-all = yes 
+allow-wildcard-with-all = yes

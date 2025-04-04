@@ -47,6 +47,16 @@ source venv/bin/activate  # Activate your virtual environment first
 ./scripts/run-linters.sh
 ```
 
+You can also run with plugin initialization for TFLint:
+
+```bash
+# Initialize TFLint plugins before running
+./scripts/run-linters.sh --init-tflint
+
+# Force reinstallation of TFLint plugins before running
+./scripts/run-linters.sh --force-init-tflint
+```
+
 This script will:
 1. Check if all required linters are installed
 2. Run each linter with appropriate configuration
@@ -67,10 +77,20 @@ TFLint is configured to:
 - Verify module structure
 - Include specific rules for Azure and OCI providers
 
+The TFLint configuration uses the following plugins:
+- terraform (v0.10.0) - General Terraform linting rules
+- azurerm (v0.25.1) - Azure-specific rules
+
 To run manually:
 ```bash
 cd terraform
-tflint --config=../.lintconfig/tflint.hcl --recursive
+tflint --config=../.lintconfig/tflint.hcl
+```
+
+If you encounter plugin initialization errors:
+```bash
+# Initialize plugins first
+tflint --init --config=../.lintconfig/tflint.hcl
 ```
 
 ### ansible-lint (Ansible)
@@ -156,4 +176,4 @@ If you need to modify linter rules or configurations:
 
 1. Edit the appropriate file in the `.lintconfig` directory
 2. Test your changes by running the specific linter
-3. Update this documentation if the behavior changes significantly 
+3. Update this documentation if the behavior changes significantly

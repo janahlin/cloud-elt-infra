@@ -32,4 +32,4 @@ extra_vars:
   environment: dev
 
 # Define verbosity level
-verbosity: 1 
+verbosity: 1

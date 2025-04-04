@@ -203,7 +203,7 @@ After installing all the required tools:
    ```bash
    # For Azure
    ansible-playbook ansible/playbooks/deploy_azure_infra.yml -e @azure-vars.yml
-   
+
    # For OCI
    ansible-playbook ansible/playbooks/deploy_oci_infra.yml -e @oci-vars.yml
-   ``` 
+   ```

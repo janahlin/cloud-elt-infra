@@ -39,6 +39,52 @@ The Ansible configuration file is located at `ansible/ansible.cfg`. Key configur
 inventory = ./inventories
 roles_path = ./roles
 vault_identity_list = dev@.vault_pass_dev.txt, prod@.vault_pass_prod.txt
+collections_paths = ./venv/lib/python3.10/site-packages/ansible_collections:~/.ansible/collections
+```
+
+## Collections Management
+
+### Project-Specific Collections
+
+This project uses a virtual environment approach to manage Ansible collections. We prioritize collections installed in the virtual environment over system-wide collections. This:
+
+1. Prevents version conflicts
+2. Ensures reproducible builds
+3. Allows the project to use specific versions without affecting other projects
+
+### Required Collections
+
+The following Ansible collections are required:
+
+| Collection | Version | Description |
+|------------|---------|-------------|
+| ansible.posix | 1.5.4 | POSIX system utilities |
+| community.general | 9.1.0 | General community modules |
+
+### Installing and Managing Collections
+
+Collections are automatically installed in the virtual environment when you run `./scripts/setup-venv.sh`.
+
+If you see warnings about collection conflicts:
+
+```
+WARNING: Another version of 'ansible.posix' 1.1.1 was found installed...
+```
+
+Run the fix script:
+
+```bash
+./scripts/fix-ansible-collections.sh
+```
+
+To manually install a collection in the virtual environment:
+
+```bash
+# First activate the virtual environment
+source venv/bin/activate
+
+# Install the collection in the virtual environment
+ansible-galaxy collection install collection_name:version -p venv/lib/python3.10/site-packages/ansible_collections
 ```
 
 ## Playbooks
@@ -102,12 +148,17 @@ This script creates environment-specific vault password files like `.vault_pass_
    - Use different vault passwords for different environments
    - Rotate vault passwords regularly
 
+4. **Collection Management**
+   - Use the virtual environment to isolate collection dependencies
+   - Document required collection versions
+   - Use the provided scripts to manage collections
+
 ## Troubleshooting
 
 ### Common Issues
 
 1. **Recursive Loop in Template**
-   - **Error**: 
+   - **Error**:
      ```
      ERROR! Unexpected Exception, this is probably a bug: recursive loop detected in template string: {{ environment | default('dev') }}
      ```
@@ -119,7 +170,7 @@ This script creates environment-specific vault password files like `.vault_pass_
        include_tasks: deploy.yml
        vars:
          environment: "{{ environment | default('dev') }}"
-     
+
      # CORRECT
      - name: Deploy resources
        include_tasks: deploy.yml
@@ -128,7 +179,7 @@ This script creates environment-specific vault password files like `.vault_pass_
      ```
 
 2. **Missing Vault Password File**
-   - **Error**: 
+   - **Error**:
      ```
      ERROR! The vault password file ./.vault_pass_dev.txt was not found
      ```
@@ -152,9 +203,19 @@ This script creates environment-specific vault password files like `.vault_pass_
              localhost:
      ```
 
+4. **Collection Version Conflicts**
+   - **Error/Warning**:
+     ```
+     WARNING: Another version of 'ansible.posix' 1.1.1 was found installed...
+     ```
+   - **Solution**: Run the script to install collections in the virtual environment:
+     ```bash
+     ./scripts/fix-ansible-collections.sh
+     ```
+
 ### Getting Help
 
 For additional help:
 1. Check the [Ansible documentation](https://docs.ansible.com/)
 2. Review cloud provider documentation
-3. Contact the project maintainers 
+3. Contact the project maintainers

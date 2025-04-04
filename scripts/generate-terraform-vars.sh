@@ -126,7 +126,7 @@ cat > "$TEMP_DIR/rebuild_vars.yml" << EOF
         resource_prefix: "{{ resource_prefix }}"
         env_name: "$ENV"
         cloud_provider: "{{ cloud_provider }}"
-        
+
     - name: Rebuild complex variables
       set_fact:
         azure_resource_group_name: "{{ resource_prefix }}-{{ env_name }}-rg"
@@ -139,7 +139,7 @@ cat > "$TEMP_DIR/rebuild_vars.yml" << EOF
         oci_vcn_name: "{{ resource_prefix }}-{{ env_name }}-vcn"
         oci_subnet_name: "{{ resource_prefix }}-{{ env_name }}-subnet"
         oci_instance_name: "{{ resource_prefix }}-{{ env_name }}-instance"
-        
+
     - name: Export rebuilt variables to file
       copy:
         content: "{{ vars | to_nice_yaml }}"
@@ -164,10 +164,10 @@ cat > "$PLAYBOOK_FILE" << EOF
     - name: Set environment name explicitly to override Ansible's reserved name
       set_fact:
         env_name: "$ENV"
-        
+
     - name: Debug environment values
       debug:
-        msg: 
+        msg:
           - "Environment: {{ environment }}"
           - "env_name: {{ env_name }}"
           - "Azure RG: {{ azure_resource_group_name }}"
@@ -185,4 +185,4 @@ ANSIBLE_VAULT_PASSWORD_FILE="$VAULT_PASS_FILE" ansible-playbook "$PLAYBOOK_FILE"
 # Clean up
 rm -rf "$TEMP_DIR"
 
-echo "Successfully generated terraform.tfvars for $ENV environment" 
+echo "Successfully generated terraform.tfvars for $ENV environment"

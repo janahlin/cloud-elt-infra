@@ -191,7 +191,7 @@ terraform apply -var-file=terraform.tfvars
      ```hcl
      # CORRECT:
      module.azure_environment["azure"].resource_group_name
-     
+
      # INCORRECT:
      module.azure_environment[*].resource_group_name
      ```
@@ -202,7 +202,7 @@ terraform apply -var-file=terraform.tfvars
      ```hcl
      # CORRECT:
      storage_account_replication_type = "LRS"
-     
+
      # INCORRECT:
      storage_account_replication_type = "Standard_LRS"
      ```
@@ -236,4 +236,4 @@ terraform apply -var-file=terraform.tfvars
 For additional help:
 1. Check the [Terraform documentation](https://www.terraform.io/docs)
 2. Review cloud provider documentation
-3. Contact the project maintainers 
+3. Contact the project maintainers

@@ -64,9 +64,9 @@
     src: azure_vm_recovery.sh.j2
     dest: "/opt/cloud-elt-infra/scripts/azure_vm_recovery.sh"
     mode: '0755'
-  
+
 - name: Create recovery script for databases
   template:
     src: azure_db_recovery.sh.j2
     dest: "/opt/cloud-elt-infra/scripts/azure_db_recovery.sh"
-    mode: '0755' 
+    mode: '0755'

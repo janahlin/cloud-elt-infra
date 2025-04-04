@@ -1,23 +1,24 @@
 plugin "terraform" {
   enabled = true
-  version = "0.2.0"
+  version = "0.10.0"
   source  = "github.com/terraform-linters/tflint-ruleset-terraform"
 }
 
 plugin "azurerm" {
   enabled = true
-  version = "0.21.0"
+  version = "0.25.1"
   source  = "github.com/terraform-linters/tflint-ruleset-azurerm"
 }
 
-plugin "oci" {
-  enabled = true
-  version = "0.2.2"
-  source  = "github.com/janschumann/tflint-ruleset-oci"
-}
+# OCI plugin temporarily disabled due to unavailability
+# plugin "oci" {
+#   enabled = true
+#   version = "0.2.2"
+#   source  = "github.com/janschumann/tflint-ruleset-oci"
+# }
 
 config {
-  module = true
+  call_module_type = "local"
   force = false
   disabled_by_default = false
 }
@@ -64,4 +65,4 @@ rule "terraform_required_providers" {
 
 rule "terraform_standard_module_structure" {
   enabled = true
-} 
+}

@@ -3,7 +3,7 @@ variable "cloud_provider" {
   description = "Cloud provider to use (azure or oci)"
   type        = string
   default     = "azure"
-  
+
   validation {
     condition     = contains(["azure", "oci"], var.cloud_provider)
     error_message = "The cloud_provider value must be either 'azure' or 'oci'."
@@ -14,7 +14,7 @@ variable "environment" {
   description = "Environment (dev, staging, prod)"
   type        = string
   default     = "dev"
-  
+
   validation {
     condition     = contains(["dev", "staging", "prod"], var.environment)
     error_message = "The environment value must be 'dev', 'staging', or 'prod'."
@@ -144,19 +144,19 @@ variable "azure_vm_admin_username" {
 variable "storage_tier" {
   description = "Storage tier to use (for both Azure and OCI)"
   type        = string
-  default     = "Standard_LRS"  # Most economical storage option for Azure
+  default     = "Standard_LRS" # Most economical storage option for Azure
 }
 
 variable "databricks_sku" {
   description = "The SKU for Azure Databricks"
   type        = string
-  default     = "standard"  # Standard tier is more economical than premium
+  default     = "standard" # Standard tier is more economical than premium
 }
 
 variable "vm_size" {
   description = "The size of VM to use in Azure"
   type        = string
-  default     = "Standard_B1s"  # Free tier eligible VM size
+  default     = "Standard_B1s" # Free tier eligible VM size
 }
 
 # OCI specific variables

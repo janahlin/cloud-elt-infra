@@ -50,10 +50,10 @@ terraform plan -var-file=terraform.tfvars
 if [ "$MODE" == "apply" ]; then
     echo "Applying Terraform configuration..."
     terraform apply -auto-approve -var-file=terraform.tfvars
-    
+
     # Verify results
     echo "Verifying results..."
-    
+
     # 1. Check if resources were created
     echo "Checking resource creation..."
     terraform state list | grep -q "module" || {
@@ -87,4 +87,4 @@ cd - > /dev/null
 echo "Cleaning up test environment..."
 rm -rf "$TEST_DIR"
 
-echo "Test completed successfully!" 
+echo "Test completed successfully!"

@@ -143,7 +143,7 @@ When your workload grows beyond what the free tier can handle:
    vm_size = "Standard_D2s_v3" # Or other appropriate size
 
    # OCI
-   compute_shape = "VM.Standard.E3.Flex" 
+   compute_shape = "VM.Standard.E3.Flex"
    shape_config {
      ocpus = 2
      memory_in_gbs = 4
@@ -154,4 +154,4 @@ When your workload grows beyond what the free tier can handle:
    - Advanced monitoring
    - Geo-redundant storage
    - Larger database instances
-   - High-availability configurations 
+   - High-availability configurations

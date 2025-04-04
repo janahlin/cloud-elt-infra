@@ -56,14 +56,14 @@ fi
 if [ ! -f "ansible/group_vars/$ENV/vault.yml" ]; then
   echo "Creating vault variables file from template"
   cp "ansible/group_vars/all/vault.yml.example" "ansible/group_vars/$ENV/vault.yml"
-  
+
   # Prompt user to edit the vault file
   read -p "Would you like to edit the vault file now (y/n)? " -n 1 -r
   echo ""
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     ${EDITOR:-vi} "ansible/group_vars/$ENV/vault.yml"
   fi
-  
+
   # Encrypt the vault file
   ansible-vault encrypt --vault-id "$ENV@.vault_pass_$ENV.txt" "ansible/group_vars/$ENV/vault.yml"
   success "Vault file created and encrypted: ansible/group_vars/$ENV/vault.yml"
@@ -89,4 +89,4 @@ echo "  2. Edit encrypted variables:"
 echo "     ansible-vault edit --vault-id $ENV@.vault_pass_$ENV.txt ansible/group_vars/$ENV/vault.yml"
 echo ""
 echo "  3. Run playbooks with encrypted variables:"
-echo "     ansible-playbook -i ansible/inventories/$ENV/hosts.yml --vault-id $ENV@.vault_pass_$ENV.txt ansible/playbooks/deploy_azure_infra.yml" 
+echo "     ansible-playbook -i ansible/inventories/$ENV/hosts.yml --vault-id $ENV@.vault_pass_$ENV.txt ansible/playbooks/deploy_azure_infra.yml"

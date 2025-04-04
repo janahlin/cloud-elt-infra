@@ -19,6 +19,7 @@ This script will:
 2. Create a new virtual environment named `venv` in the project root
 3. Activate the virtual environment
 4. Install all required dependencies from `requirements.txt`
+5. Install required Ansible collections within the virtual environment
 
 You can also specify a custom name for your virtual environment:
 
@@ -58,6 +59,13 @@ When activated, your command prompt will be prefixed with `(venv)` indicating th
 pip install -r requirements.txt
 ```
 
+### 4. Install Ansible Collections
+
+```bash
+# Install collections inside the virtual environment
+ansible-galaxy collection install ansible.posix:1.5.4 community.general:9.1.0 -p venv/lib/python3.10/site-packages/ansible_collections
+```
+
 ## Working with the Virtual Environment
 
 ### Activating the Environment
@@ -94,6 +102,39 @@ Remember to update the requirements.txt file:
 pip freeze > requirements.txt
 ```
 
+## Ansible Collections Management
+
+### Using Project-Specific Collections
+
+This project is configured to use Ansible collections from the virtual environment first, falling back to system-level collections if needed. This prevents conflicts between different versions of the same collection.
+
+If you see warnings about multiple versions of collections, you can fix this with:
+
+```bash
+./scripts/fix-ansible-collections.sh
+```
+
+This script will:
+1. Detect your virtual environment's Python version
+2. Install the required collection versions into your virtual environment
+3. Update the `ansible.cfg` file to prioritize collections in the virtual environment
+
+### Manually Installing Collections
+
+If you need to install additional collections or specific versions:
+
+```bash
+ansible-galaxy collection install collection_name:version -p venv/lib/python3.10/site-packages/ansible_collections
+```
+
+### Adding New Collection Dependencies
+
+If you add a new collection dependency to the project:
+
+1. Add the collection to the `install_ansible_collections` function in `scripts/setup-venv.sh`
+2. Add the collection to the `fix_collections` function in `scripts/fix-ansible-collections.sh`
+3. Document the new dependency in the relevant documentation
+
 ## Using with Linters and Deployment Scripts
 
 All linters and deployment scripts in this project will work with your virtual environment once it's activated.
@@ -125,10 +166,22 @@ If you see "ModuleNotFoundError", make sure:
 1. Your virtual environment is activated (you should see `(venv)` in your prompt)
 2. You've installed all dependencies with `pip install -r requirements.txt`
 
+### Ansible Collection Conflicts
+
+If you see warnings like:
+```
+WARNING: Another version of 'ansible.posix' was found installed...
+```
+
+Run the provided fix script:
+```bash
+./scripts/fix-ansible-collections.sh
+```
+
 ### Python Version Issues
 
 This project requires Python 3.8 or newer. If you have multiple Python versions installed, make sure to create the virtual environment with the correct version:
 
 ```bash
 python3.8 -m venv venv
-``` 
+```

@@ -29,20 +29,20 @@ check_command() {
   local cmd=$1
   local min_version=$2
   local cmd_path=$(which $cmd 2>/dev/null || echo "")
-  
+
   if [ -z "$cmd_path" ]; then
     error "$cmd not found"
     return 1
   fi
-  
+
   local version=$($cmd --version 2>&1 | head -n 1 | grep -o "[0-9]\+\.[0-9]\+\.[0-9]\+" | head -n 1)
-  
+
   if [ -z "$version" ]; then
     version=$($cmd --version 2>&1 | head -n 1)
     success "$cmd found, version: $version"
     return 0
   fi
-  
+
   if [ -n "$min_version" ]; then
     if [[ $(printf '%s\n' "$min_version" "$version" | sort -V | head -n1) == "$min_version" ]]; then
       success "$cmd found, version: $version (required: $min_version)"
@@ -57,10 +57,10 @@ check_command() {
 check_python_package() {
   local package=$1
   local min_version=$2
-  
+
   if pip show "$package" &>/dev/null; then
     local version=$(pip show "$package" | grep "Version:" | awk '{print $2}')
-    
+
     if [ -n "$min_version" ]; then
       if [[ $(printf '%s\n' "$min_version" "$version" | sort -V | head -n1) == "$min_version" ]]; then
         success "Python package $package found, version: $version (required: $min_version)"
@@ -116,4 +116,4 @@ echo
 echo "If any tools are missing or outdated, run the setup script:"
 echo "  ./scripts/setup-environment.sh"
 echo
-echo "Or follow the manual installation instructions in docs/installation.md" 
+echo "Or follow the manual installation instructions in docs/installation.md"

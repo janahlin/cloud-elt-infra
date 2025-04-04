@@ -28,4 +28,4 @@ output "oci_log_group_id" {
 output "oci_notification_topic_id" {
   description = "OCID of the OCI Notification Topic"
   value       = var.cloud_provider == "oci" && length(var.notification_topic_ids) == 0 ? one(oci_ons_notification_topic.alert_topic[*].id) : null
-} 
+}

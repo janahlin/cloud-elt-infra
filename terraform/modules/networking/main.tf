@@ -26,12 +26,12 @@ resource "oci_core_route_table" "route_table" {
 }
 
 resource "oci_core_subnet" "subnet" {
-  count             = var.cloud_provider == "oci" ? var.subnet_count : 0
-  cidr_block        = cidrsubnet(var.vpc_cidr, 8, count.index)
-  compartment_id    = var.compartment_id
-  vcn_id            = oci_core_vcn.vcn[0].id
-  display_name      = "${var.resource_prefix}-${var.environment}-subnet-${count.index}"
-  route_table_id    = oci_core_route_table.route_table[0].id
+  count          = var.cloud_provider == "oci" ? var.subnet_count : 0
+  cidr_block     = cidrsubnet(var.vpc_cidr, 8, count.index)
+  compartment_id = var.compartment_id
+  vcn_id         = oci_core_vcn.vcn[0].id
+  display_name   = "${var.resource_prefix}-${var.environment}-subnet-${count.index}"
+  route_table_id = oci_core_route_table.route_table[0].id
 }
 
 # Azure Resources

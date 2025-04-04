@@ -13,22 +13,22 @@ output "environment" {
 locals {
   # Azure outputs (only available if using Azure)
   azure_outputs = var.cloud_provider == "azure" ? {
-    resource_group_name     = try(module.azure_environment["azure"].resource_group_name, null)
-    vnet_id                 = try(module.azure_environment["azure"].vnet_id, null)
-    storage_account_name    = try(module.azure_environment["azure"].storage_account_name, null)
+    resource_group_name      = try(module.azure_environment["azure"].resource_group_name, null)
+    vnet_id                  = try(module.azure_environment["azure"].vnet_id, null)
+    storage_account_name     = try(module.azure_environment["azure"].storage_account_name, null)
     databricks_workspace_url = try(module.azure_environment["azure"].databricks_workspace_url, null)
-    data_factory_name       = try(module.azure_environment["azure"].data_factory_name, null)
+    data_factory_name        = try(module.azure_environment["azure"].data_factory_name, null)
   } : {}
-  
+
   # OCI outputs (only available if using OCI)
   oci_outputs = var.cloud_provider == "oci" ? {
-    compartment_id          = try(module.oci_environment["oci"].compartment_id, null)
-    compartment_name        = try(module.oci_environment["oci"].compartment_name, null)
+    compartment_id           = try(module.oci_environment["oci"].compartment_id, null)
+    compartment_name         = try(module.oci_environment["oci"].compartment_name, null)
     object_storage_namespace = try(module.oci_environment["oci"].object_storage_namespace, null)
-    vcn_id                  = try(module.oci_environment["oci"].vcn_id, null)
-    bucket_name             = try(module.oci_environment["oci"].bucket_name, null)
-    databricks_url          = try(module.oci_environment["oci"].databricks_url, null)
-    airflow_url             = try(module.oci_environment["oci"].airflow_url, null)
+    vcn_id                   = try(module.oci_environment["oci"].vcn_id, null)
+    bucket_name              = try(module.oci_environment["oci"].bucket_name, null)
+    databricks_url           = try(module.oci_environment["oci"].databricks_url, null)
+    airflow_url              = try(module.oci_environment["oci"].airflow_url, null)
   } : {}
 }
 
@@ -42,13 +42,13 @@ output "deployed_infrastructure" {
     storage_account      = try(local.azure_outputs.storage_account_name, null)
     databricks_workspace = try(local.azure_outputs.databricks_workspace_url, null)
     data_factory_name    = try(local.azure_outputs.data_factory_name, null)
-  } : {
-    provider           = "OCI"
-    environment        = var.environment
-    compartment        = try(local.oci_outputs.compartment_name, null)
-    object_storage     = try(local.oci_outputs.object_storage_namespace, null)
-    airflow_url        = try(local.oci_outputs.airflow_url, null)
-    databricks_url     = try(local.oci_outputs.databricks_url, null)
+    } : {
+    provider       = "OCI"
+    environment    = var.environment
+    compartment    = try(local.oci_outputs.compartment_name, null)
+    object_storage = try(local.oci_outputs.object_storage_namespace, null)
+    airflow_url    = try(local.oci_outputs.airflow_url, null)
+    databricks_url = try(local.oci_outputs.databricks_url, null)
   }
 }
 
@@ -57,7 +57,7 @@ output "connection_details" {
   value = var.cloud_provider == "azure" ? {
     databricks_host = try(local.azure_outputs.databricks_workspace_url, null)
     storage_account = try(local.azure_outputs.storage_account_name, null)
-  } : {
+    } : {
     databricks_host = try(local.oci_outputs.databricks_url, null)
     object_storage  = try(local.oci_outputs.object_storage_namespace, null)
     airflow_url     = try(local.oci_outputs.airflow_url, null)

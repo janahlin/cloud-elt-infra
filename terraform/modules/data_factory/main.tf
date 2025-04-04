@@ -43,6 +43,9 @@ resource "azurerm_data_factory" "adf" {
   location            = var.location
   resource_group_name = var.resource_group_name
 
+  # Disable public network access for security
+  public_network_enabled = false
+
   identity {
     type = "SystemAssigned"
   }
@@ -54,10 +57,10 @@ resource "azurerm_data_factory" "adf" {
 
 # Example pipeline
 resource "azurerm_data_factory_pipeline" "example_pipeline" {
-  count               = var.cloud_provider == "azure" ? 1 : 0
-  name                = "example-pipeline"
-  data_factory_id     = azurerm_data_factory.adf[0].id
-  
+  count           = var.cloud_provider == "azure" ? 1 : 0
+  name            = "example-pipeline"
+  data_factory_id = azurerm_data_factory.adf[0].id
+
   activities_json = <<JSON
 [
   {

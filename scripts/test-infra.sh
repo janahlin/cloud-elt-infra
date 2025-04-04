@@ -28,4 +28,4 @@ if [ "$MODE" == "apply" ]; then
 fi
 ./scripts/test-playbook.sh "$TEST_ENV" "$ANSIBLE_MODE"
 
-echo "All tests completed successfully!" 
+echo "All tests completed successfully!"

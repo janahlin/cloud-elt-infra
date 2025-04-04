@@ -38,4 +38,4 @@ vault_db_port: "5432"  # Default PostgreSQL port
 vault_db_name: "your-database-name"
 
 # Additional secrets can be added here as needed
-# Format: vault_<service>_<credential_type> 
+# Format: vault_<service>_<credential_type>

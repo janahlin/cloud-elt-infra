@@ -48,7 +48,7 @@ cat > "$TEST_PLAYBOOK" << EOF
 - name: Test Playbook
   hosts: controller
   gather_facts: no
-  
+
   tasks:
     - name: Display test message
       debug:
@@ -67,4 +67,4 @@ ansible-playbook "$TEST_PLAYBOOK" -i "$TEST_DIR/hosts.yml" ${MODE:+--$MODE} || {
 echo "Cleaning up test environment..."
 rm -rf "$TEST_DIR"
 
-echo "Playbook test completed successfully!" 
+echo "Playbook test completed successfully!"

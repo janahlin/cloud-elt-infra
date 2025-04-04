@@ -60,4 +60,4 @@ variable "alert_email_addresses" {
   description = "List of email addresses for alerts"
   type        = list(string)
   default     = []
-} 
+}

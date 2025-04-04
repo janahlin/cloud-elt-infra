@@ -5,18 +5,24 @@ This repository contains the infrastructure as code for our cloud-based ELT (Ext
 ## Setup
 
 1. Clone this repository
-2. Install required dependencies:
+2. Set up virtual environment (recommended):
+   ```bash
+   ./scripts/setup-venv.sh
+   source venv/bin/activate
+   ```
+
+3. Install required dependencies:
    - Ansible 2.9+
    - Terraform 1.0+
    - Azure CLI (for Azure deployments)
    - OCI CLI (for OCI deployments)
 
-3. Set up your environment-specific vault password file:
+4. Set up your environment-specific vault password file:
    ```bash
    ./scripts/setup-ansible-vault.sh dev
    ```
 
-4. Generate Terraform variables from Ansible:
+5. Generate Terraform variables from Ansible:
    ```bash
    ./scripts/generate-terraform-vars.sh dev
    ```
@@ -48,6 +54,19 @@ module.azure_environment["azure"].resource_group_name
 module.oci_environment["oci"].compartment_id
 ```
 
+### Ansible Collection Conflicts
+
+If you see warnings about multiple versions of Ansible collections:
+
+```
+WARNING: Another version of 'ansible.posix' was found installed...
+```
+
+Run the fix script to install collections in the virtual environment:
+```bash
+./scripts/fix-ansible-collections.sh
+```
+
 ### Circular Dependencies
 
 If you encounter cycle errors like:
@@ -61,6 +80,16 @@ Remove the circular reference by editing the storage module.
 ### Ansible Reserved Variable Names
 
 The `environment` name is reserved in Ansible. To avoid recursive template errors, use `env_name` in your variables and template expressions instead.
+
+### TFLint Plugin Issues
+
+If you encounter TFLint plugin initialization errors, run the linter with initialization:
+
+```bash
+./scripts/run-linters.sh --init-tflint
+# Or to force reinstall plugins:
+./scripts/run-linters.sh --force-init-tflint
+```
 
 ## Testing
 
@@ -88,6 +117,13 @@ To test just the Terraform configuration:
 To test just the Ansible playbooks:
 ```bash
 ./scripts/test-playbook.sh dev check
+```
+
+### Code Quality
+
+To run all linters and check code quality:
+```bash
+./scripts/run-linters.sh
 ```
 
 ## Development Workflow
@@ -133,6 +169,7 @@ The cloud provider is selected in the `vars.yml` file with the `cloud_provider` 
 - `terraform/` - Terraform modules and configurations
 - `scripts/` - Utility scripts for development and deployment
 - `docs/` - Additional documentation
+- `.lintconfig/` - Linter configurations
 
 ## Documentation
 

@@ -117,4 +117,4 @@ The vault template includes the following sections:
 ## Additional Resources
 - [Ansible Vault Documentation](https://docs.ansible.com/ansible/latest/user_guide/vault.html)
 - [Azure Service Principal Guide](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal)
-- [OCI API Key Documentation](https://docs.oracle.com/en-us/iaas/Content/API/Concepts/apisigningkey.htm) 
+- [OCI API Key Documentation](https://docs.oracle.com/en-us/iaas/Content/API/Concepts/apisigningkey.htm)
