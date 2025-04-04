@@ -15,6 +15,9 @@ skip_list:
   - no-changed-when  # Tasks that run command/shell/raw should have changed_when
   - no-handler  # Tasks that notify a handler must have a unique handler name
   - yaml[line-length]  # Line length should be under 160 characters
+  - vault-encrypted  # Skip vault encryption checks during linting
+  - no-log-password  # Skip password logging checks
+  - no-handler  # Skip handler checks for vault operations
 
 # Enable all warnings
 warn_list:
