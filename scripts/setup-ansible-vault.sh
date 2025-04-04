@@ -89,8 +89,13 @@ setup_vault() {
     success "Added $VAULT_PASS_FILE to .gitignore"
   fi
 
+  # Set up vault file path based on environment
+  VAULT_FILE="$DIR/group_vars/$ENV/vault.yml"
+
+  # Create environment directory if it doesn't exist
+  mkdir -p "$(dirname "$VAULT_FILE")"
+
   # Check if vault file already exists
-  VAULT_FILE="$DIR/vault.yml"
   if [ -f "$VAULT_FILE" ]; then
     warning "Vault file already exists: $VAULT_FILE"
     read -p "Do you want to overwrite it? (y/n) " -n 1 -r
@@ -101,7 +106,7 @@ setup_vault() {
     fi
   fi
 
-  # Copy example file if it exists
+  # Copy example vault file if it exists
   if [ -f "ansible/group_vars/all/vault.yml.example" ]; then
     cp "ansible/group_vars/all/vault.yml.example" "$VAULT_FILE.tmp"
     success "Created vault file from example"

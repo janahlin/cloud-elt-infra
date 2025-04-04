@@ -76,9 +76,12 @@ setup_python() {
     pip install -r requirements.txt
   else
     echo "requirements.txt not found, creating a basic one..."
-    echo "ansible>=2.9,<3.0" > requirements.txt
-    echo "checkov" >> requirements.txt
-    echo "tfsec" >> requirements.txt
+    cat > requirements.txt << EOF
+ansible-core==2.17.10
+ansible==10.7.0
+ansible-compat==25.1.5
+ansible-lint==25.2.0
+EOF
     pip install -r requirements.txt
   fi
 
@@ -88,10 +91,13 @@ setup_python() {
 # Install Ansible
 install_ansible() {
   echo "Installing Ansible..."
-  pip install "ansible>=2.9,<3.0"
+
+  # Install latest Ansible packages
+  pip install ansible-core==2.17.10 ansible==10.7.0 ansible-compat==25.1.5
 
   # Verify installation
   ansible --version
+  ansible-compat --version
 
   echo "Ansible installed successfully."
 }
@@ -296,7 +302,7 @@ main() {
     grep -v "^azure\|^oci\|^jmespath" requirements.txt.full > requirements.txt
     echo "# Core dependencies without cloud CLIs" >> requirements.txt
     echo "click==8.0.4" >> requirements.txt
-    echo "ansible>=2.9.0,<3.0.0" >> requirements.txt
+    echo "ansible==10.7.0" >> requirements.txt
     echo "python-terraform>=0.10.1" >> requirements.txt
     echo "checkov>=2.0.0" >> requirements.txt
     echo "black>=22.0.0" >> requirements.txt

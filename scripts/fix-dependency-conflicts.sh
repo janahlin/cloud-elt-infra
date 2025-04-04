@@ -88,7 +88,7 @@ fix_jmespath_conflict() {
   grep -v "^azure\|^oci\|^jmespath\|^checkov\|^bc-\|^dpath\|^cyclonedx-python-lib\|^pycep-parser" requirements.txt > new-requirements.txt
   echo "# Core dependencies without cloud CLIs" >> new-requirements.txt
   echo "click==8.0.4" >> new-requirements.txt
-  echo "ansible>=2.9.0,<3.0.0" >> new-requirements.txt
+  echo "ansible==10.7.0" >> new-requirements.txt
   echo "python-terraform>=0.10.1" >> new-requirements.txt
   echo "# Pin checkov and its required bc-* dependencies to compatible versions" >> new-requirements.txt
   echo "dpath==1.5.0" >> new-requirements.txt

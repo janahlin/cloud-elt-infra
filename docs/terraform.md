@@ -7,7 +7,10 @@ This document describes how to configure and use Terraform in this project.
 We use a two-tier approach for managing Terraform variables:
 
 1. **Non-sensitive variables** are stored in `ansible/group_vars/all/vars.yml`
-2. **Sensitive variables** are stored in `ansible/group_vars/all/vault.yml` (encrypted)
+2. **Sensitive variables** are stored in environment-specific vault files:
+   - Development: `ansible/group_vars/dev/vault.yml`
+   - Production: `ansible/group_vars/prod/vault.yml`
+   - Staging: `ansible/group_vars/staging/vault.yml`
 
 The `terraform.tfvars` file is automatically generated from these sources using the `generate-terraform-vars.sh` script.
 
@@ -20,9 +23,16 @@ terraform/
 
 ansible/
 ├── group_vars/
-│   └── all/
-│       ├── vars.yml         # Non-sensitive variables
-│       └── vault.yml        # Encrypted sensitive variables
+│   ├── all/
+│   │   └── vars.yml         # Common non-sensitive variables
+│   ├── dev/
+│   │   ├── vars.yml         # Dev-specific non-sensitive variables
+│   │   └── vault.yml        # Dev-specific encrypted sensitive variables
+│   ├── prod/
+│   │   ├── vars.yml         # Prod-specific non-sensitive variables
+│   │   └── vault.yml        # Prod-specific encrypted sensitive variables
+│   └── staging/
+│       └── vault.yml        # Staging-specific encrypted sensitive variables
 ```
 
 ### Generating terraform.tfvars

@@ -96,7 +96,7 @@ install_ansible_lint() {
   fi
 
   echo "Installing ansible-lint using pip..."
-  pip install "ansible-lint>=6.0.0,<7.0.0"
+  pip install "ansible-lint==25.2.0"
 
   if command -v ansible-lint &> /dev/null; then
     success "ansible-lint installed successfully. Version: $(ansible-lint --version | head -n 1)"

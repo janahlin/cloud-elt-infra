@@ -70,3 +70,43 @@
     src: azure_db_recovery.sh.j2
     dest: "/opt/cloud-elt-infra/scripts/azure_db_recovery.sh"
     mode: '0755'
+
+- name: Create Azure storage container for backups
+  azure.azcollection.azure_rm_storagecontainer:
+    resource_group: "{{ azure_resource_group }}"
+    storage_account_name: "{{ azure_storage_account }}"
+    name: "{{ azure_container_name }}"
+    public_access: "{{ azure_storage_container_access_type }}"
+
+- name: Upload backup to Azure storage
+  azure.azcollection.azure_rm_storageblob:
+    resource_group: "{{ azure_resource_group }}"
+    storage_account_name: "{{ azure_storage_account }}"
+    container: "{{ azure_container_name }}"
+    blob: "{{ backup_filename }}"
+    src: "{{ backup_path }}/{{ backup_filename }}"
+    content_type: "application/x-gzip"
+    force: true
+  when: operation == "backup"
+
+- name: Download backup from Azure storage
+  azure.azcollection.azure_rm_storageblob:
+    resource_group: "{{ azure_resource_group }}"
+    storage_account_name: "{{ azure_storage_account }}"
+    container: "{{ azure_container_name }}"
+    blob: "{{ backup_filename }}"
+    dest: "{{ restore_path }}/{{ backup_filename }}"
+  when: operation == "restore"
+
+- name: List available backups in Azure storage
+  azure.azcollection.azure_rm_storageblob_info:
+    resource_group: "{{ azure_resource_group }}"
+    storage_account_name: "{{ azure_storage_account }}"
+    container: "{{ azure_container_name }}"
+  register: azure_backups
+  when: operation == "list"
+
+- name: Display available backups
+  ansible.builtin.debug:
+    msg: "Available backups in Azure storage: {{ azure_backups.storageblobs | map(attribute='name') | list }}"
+  when: operation == "list"

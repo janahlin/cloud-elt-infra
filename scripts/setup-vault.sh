@@ -52,23 +52,24 @@ else
   warning "Vault password file .vault_pass_$ENV.txt already exists"
 fi
 
-# Create vault file from template
+# Check if vault file exists
 if [ ! -f "ansible/group_vars/$ENV/vault.yml" ]; then
-  echo "Creating vault variables file from template"
-  cp "ansible/group_vars/all/vault.yml.example" "ansible/group_vars/$ENV/vault.yml"
+    # Copy example file if it exists
+    if [ -f "ansible/group_vars/all/vault.yml.example" ]; then
+        cp "ansible/group_vars/all/vault.yml.example" "ansible/group_vars/$ENV/vault.yml"
+    else
+        # Create empty vault file
+        touch "ansible/group_vars/$ENV/vault.yml"
+    fi
 
-  # Prompt user to edit the vault file
-  read -p "Would you like to edit the vault file now (y/n)? " -n 1 -r
-  echo ""
-  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    # Edit the vault file
     ${EDITOR:-vi} "ansible/group_vars/$ENV/vault.yml"
-  fi
 
-  # Encrypt the vault file
-  ansible-vault encrypt --vault-id "$ENV@.vault_pass_$ENV.txt" "ansible/group_vars/$ENV/vault.yml"
-  success "Vault file created and encrypted: ansible/group_vars/$ENV/vault.yml"
+    # Encrypt the vault file
+    ansible-vault encrypt --vault-id "$ENV@.vault_pass_$ENV.txt" "ansible/group_vars/$ENV/vault.yml"
+    success "Vault file created and encrypted: ansible/group_vars/$ENV/vault.yml"
 else
-  warning "Vault file ansible/group_vars/$ENV/vault.yml already exists"
+    warning "Vault file ansible/group_vars/$ENV/vault.yml already exists"
 fi
 
 # Update .gitignore to exclude vault password files

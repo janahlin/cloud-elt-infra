@@ -2,12 +2,26 @@
 
 This document describes how to configure and use Ansible in this project.
 
+## Ansible Version
+
+This project uses the following Ansible packages:
+
+- **ansible-core**: 2.17.10
+- **ansible**: 10.7.0
+- **ansible-compat**: 25.1.5
+- **ansible-lint**: 25.2.0
+
+These versions are specified in the `requirements.txt` file and are automatically installed when setting up the virtual environment.
+
 ## Variable Management
 
 We use a two-tier approach for managing Ansible variables:
 
 1. **Non-sensitive variables** are stored in `ansible/group_vars/all/vars.yml`
-2. **Sensitive variables** are stored in `ansible/group_vars/all/vault.yml` (encrypted)
+2. **Sensitive variables** are stored in environment-specific vault files:
+   - Development: `ansible/group_vars/dev/vault.yml`
+   - Production: `ansible/group_vars/prod/vault.yml`
+   - Staging: `ansible/group_vars/staging/vault.yml`
 
 ### Variable Files Structure
 
@@ -15,8 +29,7 @@ We use a two-tier approach for managing Ansible variables:
 ansible/
 ├── group_vars/
 │   ├── all/
-│   │   ├── vars.yml         # Common non-sensitive variables
-│   │   └── vault.yml        # Common encrypted sensitive variables
+│   │   └── vars.yml         # Common non-sensitive variables
 │   ├── dev/
 │   │   ├── vars.yml         # Dev-specific non-sensitive variables
 │   │   └── vault.yml        # Dev-specific encrypted sensitive variables

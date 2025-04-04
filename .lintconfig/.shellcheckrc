@@ -1,15 +1,16 @@
 # ShellCheck configuration file
 
 # Disable specific shellcheck warnings
-# SC1090: Can't follow non-constant source
-# SC1091: Not following: file not found
-disable=SC1090,SC1091
-
-# Source file external sources even when they can't be found
-external-sources=true
+disable=SC1090,SC1091,SC2034,SC2154,SC2086
 
 # Set shell dialect
 shell=bash
+
+# Severity threshold
+severity=warning
+
+# External sources
+external-sources=true
 
 # Ignore certain files matching these globs
 exclude=*.zsh

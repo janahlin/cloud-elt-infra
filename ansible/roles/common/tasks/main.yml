@@ -23,12 +23,12 @@
 
 - name: Create workspace directory
   ansible.builtin.file:
-    path: "/opt/cloud-elt-infra"
+    path: "{{ workspace_dir | default('/opt/cloud-elt-infra') }}"
     state: directory
     mode: '0755'
 
 - name: Clone cloud-elt-infra repository
   ansible.builtin.git:
-    repo: "https://github.com/YOUR_USERNAME/cloud-elt-infra.git"
-    dest: "/opt/cloud-elt-infra"
+    repo: "https://github.com/mock/cloud-elt-infra.git"
+    dest: "{{ workspace_dir | default('/opt/cloud-elt-infra') }}"
     version: "main"

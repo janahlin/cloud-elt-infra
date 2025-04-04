@@ -1,3 +1,9 @@
+---
+# Common variables for all environments
+backup_retention_days: 30
+backup_storage_type: "standard"
+backup_compression: true
+
 # Environment configuration
 cloud_provider: "azure"  # Options: "azure" or "oci"
 environment: "dev"       # Options: "dev", "staging", "prod"
@@ -10,8 +16,13 @@ test_resource_name: "{{ resource_prefix }}-{{ environment }}-test"
 test_complex_name: "{{ resource_prefix }}-{{ environment }}-{{ cloud_provider }}-test"
 test_number: "{{ subnet_count + 1 }}"
 
+# Azure configuration
+azure_location: "eastus"
+azure_resource_group: "cloud-elt-{{ environment }}"
+azure_storage_account: "cloudelt{{ environment }}"
+azure_container_name: "backups"
+
 # Azure resource configuration
-azure_location: "eastus2"
 storage_tier: "Standard_LRS"    # Free tier eligible
 databricks_sku: "standard"      # More economical than premium
 vm_size: "Standard_B1s"         # Free tier eligible
@@ -29,6 +40,11 @@ azure_vm_admin_username: "adminuser"
 azure_storage_account_tier: "Standard"
 azure_storage_min_tls_version: "TLS1_2"
 azure_storage_container_access_type: "private"
+
+# OCI configuration
+oci_compartment_name: "cloud-elt-{{ environment }}"
+oci_bucket_name: "cloud-elt-backups-{{ environment }}"
+oci_namespace: "{{ lookup('env', 'OCI_NAMESPACE') }}"
 
 # OCI resource configuration
 oci_region: "us-ashburn-1"      # Region with best free tier support

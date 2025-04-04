@@ -165,15 +165,11 @@ install_requirements() {
   else
     warning "requirements.txt not found. Creating a basic one..."
     cat > requirements.txt << EOF
-ansible>=2.9.0,<3.0.0
-python-terraform>=0.10.1
-checkov>=2.0.0
-click==8.0.4
-pre-commit>=2.20.0
-jinja2>=3.0.0
-pyyaml>=6.0.0
+ansible-core==2.17.10
+ansible==10.7.0
+ansible-compat==25.1.5
+ansible-lint==25.2.0
 EOF
-
     pip install -r requirements.txt
     success "Basic dependencies created and installed"
   fi

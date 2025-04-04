@@ -6,6 +6,17 @@ This document describes how to set up and use a Python virtual environment for t
 
 A Python virtual environment is an isolated environment for Python projects. It allows you to work on a specific project without affecting other projects or your system Python installation. This is especially important for this project, which requires specific versions of libraries like Ansible, Pylint, and other tools.
 
+## Ansible Versions
+
+This project uses the following Ansible packages:
+
+- **ansible-core**: 2.17.10
+- **ansible**: 10.7.0
+- **ansible-compat**: 25.1.5
+- **ansible-lint**: 25.2.0
+
+These versions are specified in the `requirements.txt` file and are automatically installed when setting up the virtual environment.
+
 ## Automatic Setup
 
 We provide a script to automatically set up a virtual environment:

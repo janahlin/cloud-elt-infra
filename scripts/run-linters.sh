@@ -206,7 +206,7 @@ run_ansible_lint() {
 
   title "Running ansible-lint on Ansible files"
 
-  if ansible-lint -c .lintconfig/.ansible-lint ansible; then
+  if ANSIBLE_LINT_SKIP_VERBOSITY=1 ansible-lint -c .lintconfig/.ansible-lint ansible; then
     success "ansible-lint completed successfully"
   else
     error "ansible-lint found issues"

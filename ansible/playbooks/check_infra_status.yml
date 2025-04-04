@@ -1,28 +1,33 @@
 ---
-- name: Check Infrastructure Status
-  hosts: controller
-  become: no
+# Playbook to check infrastructure status
+- name: Check infrastructure status
+  hosts: localhost
+  connection: local
+  gather_facts: false
   vars:
-    terraform_dir: "/opt/cloud-elt-infra/terraform"
+    is_check_mode: true
   tasks:
     - name: Run terraform state list
-      command:
-        cmd: terraform state list
-        chdir: "{{ terraform_dir }}"
-      register: state_list
+      ansible.builtin.command: terraform state list
+      register: terraform_state
+      changed_when: false
+      failed_when: false
 
-    - name: Display current infrastructure resources
-      debug:
-        var: state_list.stdout_lines
+    - name: Display terraform state
+      ansible.builtin.debug:
+        var: terraform_state.stdout_lines
 
     - name: Verify key resources exist
-      command:
-        cmd: terraform state show {{ item }}
-        chdir: "{{ terraform_dir }}"
-      loop: "{{ resources_to_check | default(['module.networking']) }}"
-      register: resource_status
-      ignore_errors: yes
+      ansible.builtin.command: terraform state show "{{ item }}"
+      register: resource_state
+      changed_when: false
+      loop:
+        - "module.networking"
+        - "module.compute"
+        - "module.storage"
+      when: check_mode | bool
 
-    - name: Display resource details
-      debug:
-        var: resource_status.results
+    - name: Display resource state
+      ansible.builtin.debug:
+        var: resource_state.results
+      when: check_mode | bool
