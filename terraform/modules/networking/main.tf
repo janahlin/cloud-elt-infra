@@ -34,6 +34,11 @@ resource "oci_core_subnet" "subnet" {
   route_table_id = oci_core_route_table.route_table[0].id
 }
 
+module "common" {
+  source      = "../common"
+  environment = var.environment
+}
+
 # Azure Resources
 resource "azurerm_virtual_network" "vnet" {
   count               = var.cloud_provider == "azure" ? 1 : 0
@@ -41,6 +46,7 @@ resource "azurerm_virtual_network" "vnet" {
   resource_group_name = var.resource_group_name
   location            = var.location
   address_space       = [var.vpc_cidr]
+  tags                = module.common.common_tags
 }
 
 resource "azurerm_subnet" "subnet" {

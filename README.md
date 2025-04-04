@@ -2,6 +2,64 @@
 
 This repository contains the infrastructure as code for our cloud-based ELT (Extract, Load, Transform) platform. It supports both Azure and OCI cloud providers.
 
+## Project Purpose
+
+This project provides a complete infrastructure as code solution for setting up and managing cloud-based data processing environments. It automates the deployment of:
+
+- **Data Extraction** pipelines that pull data from various sources
+- **Data Loading** mechanisms that store data in cloud storage
+- **Data Transformation** services that process and prepare data for analysis
+
+### Key Benefits
+
+- **Multi-Cloud Support**: Deploy to either Microsoft Azure or Oracle Cloud Infrastructure
+- **Infrastructure as Code**: All resources are defined using Terraform and Ansible
+- **Environment Isolation**: Separate configurations for development, staging, and production
+- **Security-First**: Sensitive credentials are managed through Ansible Vault
+- **Automated Testing**: Comprehensive test suite for validating infrastructure
+- **Free Tier Optimization**: Configurations optimized for cloud provider free tiers
+
+### Key Features
+
+- **Automated Deployment**: One-command deployment of complete data processing infrastructure
+- **Scalable Architecture**: Designed to scale from small datasets to enterprise workloads
+- **Comprehensive Documentation**: Detailed guides for setup, usage, and troubleshooting
+- **Security Best Practices**: Follows cloud security best practices and compliance standards
+- **CI/CD Integration**: Ready for integration with continuous deployment pipelines
+
+## Cloud Provider Differences
+
+This project supports both Azure and OCI, with key differences in how data processing is implemented:
+
+### Azure Implementation
+
+Azure uses **Azure Data Factory** as the primary data integration service:
+
+- **Managed Service**: Fully managed, serverless data integration service
+- **Visual Authoring**: Pipeline development through a visual interface
+- **Built-in Connectors**: Extensive library of pre-built connectors for various data sources
+- **Integration with Azure Services**: Seamless integration with Azure Storage, SQL Database, etc.
+- **Monitoring**: Built-in monitoring and alerting capabilities
+- **Cost Model**: Pay-per-use pricing based on pipeline executions and data movement
+
+### OCI Implementation
+
+OCI uses **Apache Airflow** for data pipeline orchestration:
+
+- **Open Source**: Based on the Apache Airflow open-source project
+- **Code-First Approach**: Pipelines defined as Python code (DAGs)
+- **Extensibility**: Highly extensible through custom operators and plugins
+- **Community Ecosystem**: Access to a large ecosystem of community-contributed operators
+- **Flexibility**: More control over pipeline execution and scheduling
+- **Cost Model**: Based on compute resources allocated to the Airflow environment
+
+### Choosing Between Providers
+
+- **Choose Azure** if you prefer a fully managed service with visual development tools and minimal maintenance overhead
+- **Choose OCI** if you need more flexibility, prefer code-based pipeline definitions, or have specific requirements for custom operators
+
+Both implementations provide the same core ELT functionality but with different approaches to pipeline orchestration and management.
+
 ## Setup
 
 1. Clone this repository
@@ -12,7 +70,7 @@ This repository contains the infrastructure as code for our cloud-based ELT (Ext
    ```
 
 3. Install required dependencies:
-   - Ansible 2.9+
+   - Ansible 2.17.10+
    - Terraform 1.0+
    - Azure CLI (for Azure deployments)
    - OCI CLI (for OCI deployments)

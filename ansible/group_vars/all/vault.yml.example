@@ -30,12 +30,19 @@ vault_oci_ssh_private_key: |
   Your private key content here
   -----END RSA PRIVATE KEY-----
 
-# Database credentials
-vault_db_username: "your-database-username"
-vault_db_password: "your-database-password"
-vault_db_host: "your-database-host"
-vault_db_port: "5432"  # Default PostgreSQL port
-vault_db_name: "your-database-name"
+# OCI Database credentials
+vault_oci_db_username: "your-database-username"
+vault_oci_db_password: "your-database-password"
+vault_oci_db_host: "your-database-host.{{ oci_region | default('eu-stockholm-1') }}.oraclecloudapps.com"
+vault_oci_db_port: "5432"  # Default PostgreSQL port
+vault_oci_db_name: "your-database-name"
+
+# Azure Database credentials (using same username/password as OCI)
+vault_azure_db_username: "your-database-username"
+vault_azure_db_password: "your-database-password"
+vault_azure_db_host: "your-database-host.postgres.database.azure.com"
+vault_azure_db_port: "5432"  # Default PostgreSQL port
+vault_azure_db_name: "your-database-name"
 
 # Additional secrets can be added here as needed
 # Format: vault_<service>_<credential_type>

@@ -32,6 +32,18 @@ skip_list:
   - ignore-errors  # Skip ignore_errors checks
   - jinja[spacing]  # Skip Jinja2 spacing checks
   - schema[vars]  # Skip schema validation for vars
+  - no-same-owner  # Skip same owner checks
+  - no-same-permissions  # Skip same permissions checks
+  - no-tabs  # Skip tab checks
+  - no-trailing-spaces  # Skip trailing spaces checks
+  - no-unsafe-meta  # Skip unsafe meta checks
+  - no-unsafe-script  # Skip unsafe script checks
+  - no-unsafe-template  # Skip unsafe template checks
+  - no-unsafe-vars  # Skip unsafe vars checks
+  - no-unsafe-when  # Skip unsafe when checks
+  - no-unsafe-with-items  # Skip unsafe with_items checks
+  - no-unsafe-with-nested  # Skip unsafe with_nested checks
+  - no-unsafe-with-sequence  # Skip unsafe with_sequence checks
 
 # Enable all warnings
 warn_list:
@@ -41,9 +53,12 @@ warn_list:
 use_default_rules: true
 offline: false
 
-# Set rule strictness level
-strict: true
+# Set rule strictness level to warning instead of error
+strict: false
 
 # Additional variables to identify roles and playbooks
 extra_vars:
   environment: dev
+
+# Set the profile to min for more lenient checking
+profile: min

@@ -36,6 +36,11 @@ output "data_factory_id" {
   value       = var.cloud_provider == "azure" ? azurerm_data_factory.adf[0].id : null
 }
 
+module "common" {
+  source      = "../common"
+  environment = var.environment
+}
+
 # Azure Data Factory resources
 resource "azurerm_data_factory" "adf" {
   count               = var.cloud_provider == "azure" ? 1 : 0
@@ -50,9 +55,7 @@ resource "azurerm_data_factory" "adf" {
     type = "SystemAssigned"
   }
 
-  tags = {
-    Environment = var.environment
-  }
+  tags = module.common.common_tags
 }
 
 # Example pipeline

@@ -27,10 +27,15 @@ We provide a script to automatically set up a virtual environment:
 
 This script will:
 1. Check your Python installation and version (requires Python 3.8+)
-2. Create a new virtual environment named `venv` in the project root
-3. Activate the virtual environment
-4. Install all required dependencies from `requirements.txt`
-5. Install required Ansible collections within the virtual environment
+2. Check for Terraform installation (requires Terraform 1.0+)
+3. Check for Ansible installation (recommends Ansible 2.9+)
+4. Check for Azure CLI and OCI CLI installations
+5. Check for the Python venv module
+6. Create a new virtual environment named `venv` in the project root
+7. Activate the virtual environment
+8. Install all required dependencies from `requirements.txt`
+9. Install Ansible and related packages with specific versions
+10. Install cloud provider CLIs and development tools
 
 You can also specify a custom name for your virtual environment:
 

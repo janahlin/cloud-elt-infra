@@ -2,11 +2,12 @@
 
 ## Overview
 
-This document describes the testing framework for the cloud-elt-infra project. The framework includes three main test scripts:
+This document describes the testing framework for the cloud-elt-infra project. The framework includes four main test scripts:
 
 1. `test-playbook.sh` - Tests Ansible playbooks
 2. `test-terraform.sh` - Tests Terraform configurations
 3. `test-infra.sh` - Combined testing of both Ansible and Terraform
+4. `validate-recovery.sh` - Validates infrastructure recovery after a disaster recovery event
 
 ## Test Scripts
 
@@ -76,6 +77,38 @@ Example:
 ```bash
 ./scripts/test-infra.sh dev plan
 ```
+
+### validate-recovery.sh
+
+This script validates infrastructure recovery after a disaster recovery event by checking:
+- Resource group/compartment existence
+- Virtual machine status
+- Storage account/bucket status
+- Databricks workspace/Airflow status
+- Data Factory status
+
+Usage:
+```bash
+./scripts/validate-recovery.sh [cloud_provider] [environment]
+```
+
+Example:
+```bash
+./scripts/validate-recovery.sh azure dev
+```
+
+The script performs the following checks:
+- For Azure:
+  - Resource Group existence
+  - Virtual Machine running status
+  - Storage Account existence
+  - Databricks Workspace provisioning status
+  - Data Factory provisioning status
+- For OCI:
+  - Compartment existence
+  - Compute Instance running status
+  - Object Storage Bucket existence
+  - Airflow status (placeholder for future implementation)
 
 ## Verification Steps
 

@@ -8,7 +8,7 @@ The following tools are required:
 
 - Git
 - Python 3.8+
-- Ansible 2.9+
+- Ansible 2.17.10+
 - Terraform 1.0+
 - Cloud provider CLI tools (Azure CLI and/or OCI CLI)
 - Security scanning tools (checkov, tfsec)
@@ -92,7 +92,7 @@ pip install -r requirements.txt
 ### 4. Install Ansible
 
 ```bash
-pip install "ansible>=2.9,<3.0"
+pip install "ansible>=2.17.10,<3.0"
 ```
 
 ### 5. Install Terraform
@@ -193,17 +193,20 @@ oci setup config
 
 After installing all the required tools:
 
-1. Create and configure your cloud-specific variable files:
+1. Create and configure your environment-specific vault files:
    ```bash
-   cp example.azure-vars.yml azure-vars.yml  # For Azure deployments
-   cp example.oci-vars.yml oci-vars.yml      # For OCI deployments
+   # For development environment
+   ./scripts/setup-ansible-vault.sh dev
+
+   # For production environment
+   ./scripts/setup-ansible-vault.sh prod
    ```
 
 2. Deploy infrastructure using Ansible playbooks:
    ```bash
    # For Azure
-   ansible-playbook ansible/playbooks/deploy_azure_infra.yml -e @azure-vars.yml
+   ansible-playbook -i ansible/inventories/dev/hosts.yml ansible/playbooks/deploy_azure_infra.yml
 
    # For OCI
-   ansible-playbook ansible/playbooks/deploy_oci_infra.yml -e @oci-vars.yml
+   ansible-playbook -i ansible/inventories/dev/hosts.yml ansible/playbooks/deploy_oci_infra.yml
    ```

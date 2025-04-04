@@ -1,37 +1,128 @@
 ---
 - name: Setup Controller VM for Azure
-  hosts: controller
-  become: yes
+  hosts: localhost
+  connection: local
+  become: true
   vars:
     cloud_provider: "azure"
-  # Include vault-encrypted variables
+    # Hardcode the environment value to avoid recursive loops
+    env_name: "dev"
+    vault_file: "{{ playbook_dir }}/../group_vars/{{ env_name }}/vault.yml"
+    ansible_user: "{{ lookup('env', 'USER') }}"
+    # Map vault variables to expected variable names
+    azure_subscription_id: "{{ vault_azure_subscription_id }}"
+    azure_tenant_id: "{{ vault_azure_tenant_id }}"
+    azure_client_id: "{{ vault_azure_client_id }}"
+    azure_client_secret: "{{ vault_azure_client_secret }}"
+    # Include non-sensitive variables from all/vars.yml
+    azure_location: "{{ azure_location }}"
   vars_files:
-    - "../group_vars/{{ environment | default('dev') }}/vault.yml"
+    - "{{ vault_file | default(omit) }}"
+    - "{{ playbook_dir }}/../group_vars/all/vars.yml"
   roles:
     - common
     - terraform
     - azure_tools
     - python_tools
     - controller_setup
+  post_tasks:
+    - name: Read local SSH public key
+      slurp:
+        src: "/home/{{ ansible_user }}/.ssh/id_rsa.pub"
+      register: ssh_public_key
+      become: false
+
+- name: Setup SSH Access
+  hosts: controller
+  connection: local
+  gather_facts: false
+  vars:
+    ansible_user: "{{ lookup('env', 'USER') }}"
+  tasks:
+    - name: Ensure .ssh directory exists
+      file:
+        path: "/home/{{ ansible_user }}/.ssh"
+        state: directory
+        mode: '0700'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      become: true
+
+    - name: Add SSH public key to authorized_keys
+      authorized_key:
+        user: "{{ ansible_user }}"
+        key: "{{ hostvars['localhost']['ssh_public_key']['content'] | b64decode }}"
+        state: present
+      become: true
 
 - name: Deploy Azure Infrastructure
   hosts: controller
-  become: no  # Run as the ansible_user to use configured credentials
+  connection: local
+  become: false  # Run as the ansible_user to use configured credentials
   vars:
     cloud_provider: "azure"
     terraform_dir: "/opt/cloud-elt-infra/terraform"
-    environment: "{{ environment | default('dev') }}"
-  # Include vault-encrypted variables
+    # Hardcode the environment value to avoid recursive loops
+    env_name: "dev"
+    vault_file: "{{ playbook_dir }}/../group_vars/{{ env_name }}/vault.yml"
+    ansible_user: "{{ lookup('env', 'USER') }}"
   vars_files:
-    - "../group_vars/{{ environment | default('dev') }}/vault.yml"
+    - "{{ vault_file | default(omit) }}"
+    - "{{ playbook_dir }}/../group_vars/all/vars.yml"
+  pre_tasks:
+    - name: Set Azure environment variables
+      set_fact:
+        azure_env:
+          AZURE_SUBSCRIPTION_ID: "{{ vault_azure_subscription_id }}"
+          AZURE_TENANT_ID: "{{ vault_azure_tenant_id }}"
+          AZURE_CLIENT_ID: "{{ vault_azure_client_id }}"
+          AZURE_CLIENT_SECRET: "{{ vault_azure_client_secret }}"
+          LOCATION: "{{ azure_location | default('westeurope') }}"
+          ENVIRONMENT: "{{ env_name }}"
+          DATABRICKS_SKU: "premium"
 
-  tasks:
+    - name: Export Azure environment variables
+      shell: |
+        export AZURE_SUBSCRIPTION_ID="{{ vault_azure_subscription_id }}"
+        export AZURE_TENANT_ID="{{ vault_azure_tenant_id }}"
+        export AZURE_CLIENT_ID="{{ vault_azure_client_id }}"
+        export AZURE_CLIENT_SECRET="{{ vault_azure_client_secret }}"
+        export LOCATION="{{ azure_location | default('westeurope') }}"
+        export ENVIRONMENT="{{ env_name }}"
+        export DATABRICKS_SKU="premium"
+
+    - name: Ensure /opt/cloud-elt-infra directory exists
+      file:
+        path: "/opt/cloud-elt-infra"
+        state: directory
+        mode: '0755'
+      become: true
+
+    - name: Ensure terraform directory exists in /opt
+      file:
+        path: "/opt/cloud-elt-infra/terraform"
+        state: directory
+        mode: '0755'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      become: true
+
+    # Generate terraform.tfvars directly in the active Terraform directory
     - name: Generate terraform.tfvars from template
       template:
-        src: "../templates/terraform.tfvars.j2"
+        src: "{{ playbook_dir }}/../templates/terraform.tfvars.j2"
         dest: "{{ terraform_dir }}/terraform.tfvars"
         mode: '0600'
-      no_log: true  # Prevents logging of sensitive data
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      environment: "{{ azure_env }}"
+      register: tfvars_result
+      no_log: false  # Temporarily disable no_log to see the error
 
+    - name: Debug terraform.tfvars generation
+      debug:
+        msg: "Terraform.tfvars generation result: {{ tfvars_result }}"
+      when: tfvars_result is failed
   roles:
-    - infrastructure_deploy
+    - role: infrastructure_deploy
+      environment: "{{ azure_env }}"

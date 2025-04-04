@@ -66,6 +66,12 @@ azure_storage_account_tier = "{{ azure_storage_account_tier }}"
 azure_storage_min_tls_version = "{{ azure_storage_min_tls_version }}"
 azure_storage_container_access_type = "{{ azure_storage_container_access_type }}"
 
+# Azure database configuration
+azure_db_host = "{{ vault_azure_db_host | default('') }}"
+azure_db_name = "{{ vault_azure_db_name | default('') }}"
+azure_db_username = "{{ vault_azure_db_username | default('') }}"
+azure_db_password = "{{ vault_azure_db_password | default('') }}"
+
 # OCI specific variables
 oci_tenancy_ocid = "{{ vault_oci_tenancy_ocid | default('') }}"
 oci_user_ocid = "{{ vault_oci_user_ocid | default('') }}"
@@ -93,6 +99,12 @@ oci_storage_lifecycle_days = {{ oci_storage_lifecycle_days }}
 # OCI compute configuration
 oci_compute_ocpus = {{ oci_compute_ocpus }}
 oci_compute_memory_gb = {{ oci_compute_memory_gb }}
+
+# OCI database configuration
+oci_db_host = "{{ vault_oci_db_host | default('') }}"
+oci_db_name = "{{ vault_oci_db_name | default('') }}"
+oci_db_username = "{{ vault_oci_db_username | default('') }}"
+oci_db_password = "{{ vault_oci_db_password | default('') }}"
 
 # Databricks configuration
 databricks_docker_port = {{ databricks_docker_port }}

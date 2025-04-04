@@ -1,13 +1,20 @@
 ---
 - name: Create terraform variables file
   template:
-    src: terraform.tfvars.j2
+    src: terraform.tfvars.fixed.j2
     dest: "{{ terraform_dir }}/terraform.tfvars"
     mode: 0644
+  environment:
+    AZURE_SUBSCRIPTION_ID: "{{ vault_azure_subscription_id | default(lookup('env', 'AZURE_SUBSCRIPTION_ID')) }}"
+    AZURE_CLIENT_ID: "{{ vault_azure_client_id | default(lookup('env', 'AZURE_CLIENT_ID')) }}"
+    AZURE_CLIENT_SECRET: "{{ vault_azure_client_secret | default(lookup('env', 'AZURE_CLIENT_SECRET')) }}"
+    AZURE_TENANT_ID: "{{ vault_azure_tenant_id | default(lookup('env', 'AZURE_TENANT_ID')) }}"
+    LOCATION: "{{ azure_location | default('westeurope') }}"
+    DATABRICKS_SKU: "{{ databricks_sku | default('premium') }}"
 
 - name: Run terraform init
   command:
-    cmd: terraform init
+    cmd: terraform init -reconfigure
     chdir: "{{ terraform_dir }}"
   register: tf_init_result
 
@@ -17,7 +24,7 @@
 
 - name: Run terraform plan
   command:
-    cmd: terraform plan -out=tfplan
+    cmd: terraform plan -var-file=terraform.tfvars -out=tfplan
     chdir: "{{ terraform_dir }}"
   register: tf_plan_result
 

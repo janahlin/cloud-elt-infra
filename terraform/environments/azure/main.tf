@@ -1,8 +1,14 @@
 # Azure environment main configuration
 
+module "common" {
+  source      = "../common"
+  environment = var.environment
+}
+
 resource "azurerm_resource_group" "rg" {
   name     = "${var.resource_prefix}-${var.environment}-rg"
   location = var.location
+  tags     = module.common.common_tags
 }
 
 module "networking" {

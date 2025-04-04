@@ -23,9 +23,9 @@ azure_storage_account: "cloudelt{{ environment }}"
 azure_container_name: "backups"
 
 # Azure resource configuration
-storage_tier: "Standard_LRS"    # Free tier eligible
-databricks_sku: "standard"      # More economical than premium
-vm_size: "Standard_B1s"         # Free tier eligible
+storage_tier: "Standard_LRS"
+databricks_sku: "premium"
+vm_size: "Standard_B1s"
 
 # Azure resource names
 azure_resource_group_name: "{{ resource_prefix }}-{{ environment }}-rg"
@@ -47,9 +47,9 @@ oci_bucket_name: "cloud-elt-backups-{{ environment }}"
 oci_namespace: "{{ lookup('env', 'OCI_NAMESPACE') }}"
 
 # OCI resource configuration
-oci_region: "us-ashburn-1"      # Region with best free tier support
+oci_region: "eu-stockholm-1"      # Updated to match your OCI CLI config
 compute_shape: "VM.Standard.E2.1.Micro"  # Always Free eligible shape
-oci_compartment_id: "ocid1.compartment.oc1..example"
+oci_compartment_id: "ocid1.tenancy.oc1..aaaaaaaawcczb6nidnd6rfoqmbvqg6dihslqsrrgnw6kysz6yix4lcvig2va"  # Using root compartment until a specific one is created
 
 # OCI resource names
 oci_vcn_name: "{{ resource_prefix }}-{{ environment }}-vcn"

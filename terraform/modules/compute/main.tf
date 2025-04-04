@@ -144,6 +144,11 @@ resource "azurerm_network_interface" "nic" {
   }
 }
 
+module "common" {
+  source      = "../common"
+  environment = var.environment
+}
+
 resource "azurerm_linux_virtual_machine" "vm" {
   count               = local.is_azure ? 1 : 0
   name                = "${var.resource_prefix}-${var.environment}-vm"
@@ -178,9 +183,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
     storage_account_uri = null
   }
 
-  tags = {
-    environment = var.environment
-  }
+  tags = module.common.common_tags
 }
 
 # Free tier eligible boot volume backup policy - no regular backups

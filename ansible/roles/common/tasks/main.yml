@@ -1,15 +1,12 @@
 ---
-# Common role tasks
-
 - name: Ensure common packages are installed
   ansible.builtin.package:
-    name: "{{ item }}"
+    name:
+      - curl
+      - wget
+      - unzip
+      - jq
     state: present
-  loop:
-    - curl
-    - wget
-    - unzip
-    - jq
   when: ansible_system == "Linux"
   become: true
   ignore_errors: true
@@ -21,14 +18,9 @@
       - python3-pip
     state: present
 
-- name: Create workspace directory
+- name: Ensure workspace directory exists
   ansible.builtin.file:
     path: "{{ workspace_dir | default('/opt/cloud-elt-infra') }}"
     state: directory
     mode: '0755'
-
-- name: Clone cloud-elt-infra repository
-  ansible.builtin.git:
-    repo: "https://github.com/mock/cloud-elt-infra.git"
-    dest: "{{ workspace_dir | default('/opt/cloud-elt-infra') }}"
-    version: "main"
+  when: workspace_dir is defined and workspace_dir != ansible_env.PWD

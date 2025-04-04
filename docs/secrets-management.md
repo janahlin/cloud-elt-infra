@@ -64,12 +64,19 @@ The vault template includes the following sections:
 - `vault_oci_private_key`: API private key content
 - `vault_oci_ssh_private_key`: SSH private key for OCI instances
 
-### Database Credentials
-- `vault_db_username`: Database username
-- `vault_db_password`: Database password
-- `vault_db_host`: Database host
-- `vault_db_port`: Database port
-- `vault_db_name`: Database name
+### OCI Database Credentials
+- `vault_oci_db_username`: OCI database username
+- `vault_oci_db_password`: OCI database password
+- `vault_oci_db_host`: OCI database host
+- `vault_oci_db_port`: OCI database port
+- `vault_oci_db_name`: OCI database name
+
+### Azure Database Credentials
+- `vault_azure_db_username`: Azure database username
+- `vault_azure_db_password`: Azure database password
+- `vault_azure_db_host`: Azure database host
+- `vault_azure_db_port`: Azure database port
+- `vault_azure_db_name`: Azure database name
 
 ### Notification Settings
 - `vault_notification_emails`: List of email addresses for notifications

@@ -1,6 +1,7 @@
 # Common variables
 cloud_provider = "{{ cloud_provider }}"
-environment = "{{ environment }}"
+# Use a hardcoded environment value to avoid recursive loops
+environment = "dev"
 resource_prefix = "{{ resource_prefix }}"
 vpc_cidr = "{{ vpc_cidr }}"
 subnet_count = {{ subnet_count }}

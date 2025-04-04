@@ -16,6 +16,8 @@ credentials
 credentials.json
 *.tfvars
 !*example.tfvars
+# Explicitly exclude terraform.tfvars as it may contain sensitive information
+terraform/terraform.tfvars
 
 # Python
 __pycache__/
@@ -45,6 +47,7 @@ venv/
 ENV/
 env/
 .env/
+cloud_venvs/
 
 # IDE
 .idea/
@@ -52,17 +55,31 @@ env/
 *.swp
 *.swo
 .DS_Store
+*~
+*.bak
+*.backup
+*.tmp
 
 # Ansible
 *.retry
+.ansible/
+# Only include encrypted vault files, exclude unencrypted ones
 *.vault
+!ansible/group_vars/*/vault.yml
+# Exclude unencrypted vault files
+ansible/group_vars/*/vault.yml.unencrypted
 
 # Logs
 *.log
 logs/
-# Ansible vault password files
-.vault_pass
-.vault_pass_*.txt
 
 # Ansible vault password files
+.vault_pass
 .vault_pass*.txt
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
