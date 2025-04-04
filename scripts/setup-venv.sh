@@ -55,6 +55,71 @@ check_python() {
   fi
 }
 
+# Check for Terraform
+check_terraform() {
+  title "Checking Terraform installation"
+
+  if ! command -v terraform &> /dev/null; then
+    error "Terraform is required but not found. Please install Terraform 1.0.0 or newer."
+  fi
+
+  # Get Terraform version
+  TF_VERSION=$(terraform version -json | grep -o '"version": "[^"]*' | cut -d'"' -f4)
+
+  # Compare version to 1.0.0
+  if [ "$(printf '%s\n' "1.0.0" "$TF_VERSION" | sort -V | head -n1)" != "1.0.0" ]; then
+    error "Terraform 1.0.0+ is required, but found version $TF_VERSION. Please upgrade Terraform."
+  else
+    success "Terraform version $TF_VERSION meets the 1.0.0+ requirement"
+  fi
+}
+
+# Check for Ansible
+check_ansible() {
+  title "Checking Ansible installation"
+
+  if ! command -v ansible &> /dev/null; then
+    warning "Ansible not found. It will be installed in the virtual environment."
+    return
+  fi
+
+  # Get Ansible version
+  ANSIBLE_VERSION=$(ansible --version | head -n1 | cut -d' ' -f2)
+
+  # Compare version to 2.9.0
+  if [ "$(printf '%s\n' "2.9.0" "$ANSIBLE_VERSION" | sort -V | head -n1)" != "2.9.0" ]; then
+    warning "Ansible 2.9.0+ is recommended, but found version $ANSIBLE_VERSION. A newer version will be installed in the virtual environment."
+  else
+    success "Ansible version $ANSIBLE_VERSION meets the 2.9.0+ requirement"
+  fi
+}
+
+# Check for Azure CLI
+check_azure_cli() {
+  title "Checking Azure CLI installation"
+
+  if ! command -v az &> /dev/null; then
+    warning "Azure CLI not found. Please install it if you plan to use Azure."
+  else
+    # Get Azure CLI version
+    AZ_VERSION=$(az version --output tsv --query 'azure-cli')
+    success "Azure CLI version $AZ_VERSION found"
+  fi
+}
+
+# Check for OCI CLI
+check_oci_cli() {
+  title "Checking OCI CLI installation"
+
+  if ! command -v oci &> /dev/null; then
+    warning "OCI CLI not found. Please install it if you plan to use Oracle Cloud."
+  else
+    # Get OCI CLI version
+    OCI_VERSION=$(oci --version)
+    success "OCI CLI version $OCI_VERSION found"
+  fi
+}
+
 # Check for venv module
 check_venv() {
   title "Checking venv module"
@@ -100,154 +165,57 @@ setup_venv() {
       warning "Removing existing virtual environment..."
       rm -rf "$VENV_NAME"
     else
-      warning "Using existing virtual environment."
+      success "Using existing virtual environment"
       return
     fi
   fi
 
   # Create virtual environment
-  echo "Creating virtual environment..."
-  $PYTHON_CMD -m venv "$VENV_NAME"
-  success "Virtual environment created successfully"
-
-  # Determine activation script based on OS
-  if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
-    ACTIVATE_SCRIPT="$VENV_NAME/Scripts/activate"
-  else
-    ACTIVATE_SCRIPT="$VENV_NAME/bin/activate"
-  fi
+  $PYTHON_CMD -m venv "$VENV_NAME" || error "Failed to create virtual environment"
 
   # Activate virtual environment
-  echo "Activating virtual environment..."
-  source "$ACTIVATE_SCRIPT"
+  source "$VENV_NAME/bin/activate" || error "Failed to activate virtual environment"
 
   # Upgrade pip
-  echo "Upgrading pip..."
-  $PYTHON_CMD -m pip install --upgrade pip
+  pip install --upgrade pip || error "Failed to upgrade pip"
+
+  success "Virtual environment created and activated"
 }
 
-# Install requirements
-install_requirements() {
-  title "Installing dependencies"
+# Install required packages
+install_packages() {
+  title "Installing required packages"
 
-  if [ -f "requirements.txt" ]; then
-    echo "Installing dependencies from requirements.txt..."
+  # Install Ansible and related packages
+  pip install ansible-core==2.17.10 ansible==10.7.0 ansible-compat==25.1.5 || error "Failed to install Ansible packages"
 
-    # Install pip-tools for better dependency resolution
-    pip install pip-tools
+  # Install cloud provider CLIs
+  pip install azure-cli oci-cli || warning "Failed to install cloud provider CLIs"
 
-    # Create a requirements.in file if it doesn't exist
-    if [ ! -f "requirements.in" ]; then
-      warning "requirements.in not found, creating from requirements.txt..."
-      cp requirements.txt requirements.in
-      # Fix known problematic dependencies
-      sed -i 's/click==8.1.8/click==8.0.4/g' requirements.in
-      sed -i '/^black==/d' requirements.in
-      sed -i '/^checkov==/d' requirements.in
-      echo "black>=22.0.0" >> requirements.in
-      echo "checkov>=2.0.0" >> requirements.in
-    fi
+  # Install development tools
+  pip install pre-commit flake8 ansible-lint || warning "Failed to install development tools"
 
-    # Compile requirements with pip-compile
-    echo "Compiling requirements with pip-compile for dependency resolution..."
-    pip-compile --output-file=requirements.txt requirements.in
-
-    # Install the resolved requirements
-    pip install -r requirements.txt
-
-    # Verify no conflicts
-    if pip check; then
-      success "Dependencies installed successfully with no conflicts"
-    else
-      warning "Some dependency conflicts detected. You may need to manually resolve them."
-      warning "Try running ./scripts/upgrade-python-deps.sh"
-    fi
-  else
-    warning "requirements.txt not found. Creating a basic one..."
-    cat > requirements.txt << EOF
-ansible-core==2.17.10
-ansible==10.7.0
-ansible-compat==25.1.5
-ansible-lint==25.2.0
-EOF
-    pip install -r requirements.txt
-    success "Basic dependencies created and installed"
-  fi
+  success "Required packages installed"
 }
 
-# Install Ansible collections in the virtual environment
-install_ansible_collections() {
-  title "Installing Ansible collections in virtual environment"
-
-  # Determine the collections path in the virtual environment
-  if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
-    COLLECTIONS_PATH="$VENV_NAME/Lib/site-packages/ansible_collections"
-  else
-    COLLECTIONS_PATH="$VENV_NAME/lib/python3.*/site-packages/ansible_collections"
-  fi
-
-  # Create the directory if it doesn't exist
-  mkdir -p $COLLECTIONS_PATH
-
-  echo "Installing Ansible collections to virtual environment..."
-
-  # Set ANSIBLE_CONFIG to use the one in ansible directory
-  if [ -f "ansible/ansible.cfg" ]; then
-    export ANSIBLE_CONFIG="$(pwd)/ansible/ansible.cfg"
-    success "Using Ansible config from: $(pwd)/ansible/ansible.cfg"
-  fi
-
-  # Install essential collections directly to the virtual environment
-  ansible-galaxy collection install ansible.posix:1.5.4 -p $COLLECTIONS_PATH
-  ansible-galaxy collection install community.general:9.1.0 -p $COLLECTIONS_PATH
-
-  success "Ansible collections installed in virtual environment"
-}
-
-# Main function
+# Main setup process
 main() {
-  title "Python Virtual Environment Setup"
+  title "Starting setup process"
 
-  # Check Python installation
   check_python
-
-  # Check venv module
+  check_terraform
+  check_ansible
+  check_azure_cli
+  check_oci_cli
   check_venv
+  setup_venv
+  install_packages
 
-  # Get virtual environment name
-  VENV_NAME="venv"
-  if [ "$1" != "" ]; then
-    VENV_NAME="$1"
-  fi
-
-  # Setup virtual environment
-  setup_venv "$VENV_NAME"
-
-  # Install requirements
-  install_requirements
-
-  # Install Ansible collections
-  install_ansible_collections
-
-  # Print activation instructions
-  echo ""
-  title "Virtual Environment Setup Complete"
-  echo ""
-  echo "Your virtual environment '${VENV_NAME}' has been created and dependencies installed."
-  echo ""
+  title "Setup completed successfully"
+  echo
   echo "To activate the virtual environment, run:"
-  if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
-    echo "  ${VENV_NAME}\\Scripts\\activate"
-  else
-    echo "  source ${VENV_NAME}/bin/activate"
-  fi
-  echo ""
-  echo "To deactivate the virtual environment when you're done, run:"
-  echo "  deactivate"
-  echo ""
-  echo "Your virtual environment is currently active in this terminal session."
-  echo ""
+  echo "source venv/bin/activate"
 }
 
-# Run main function with the first argument as virtual environment name
-main "$1"
+# Run main function
+main
