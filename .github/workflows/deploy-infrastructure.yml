@@ -201,7 +201,7 @@ jobs:
           ansible-vault encrypt --vault-id ${{ github.event.inputs.environment || 'dev' }}@.vault_pass_${{ github.event.inputs.environment || 'dev' }}.txt ansible/group_vars/${{ github.event.inputs.environment || 'dev' }}/vault.yml
 
       - name: Download Terraform plan
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: terraform-plan
           path: terraform/
