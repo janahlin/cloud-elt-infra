@@ -148,7 +148,7 @@ jobs:
           terraform plan -var-file="${{ github.event.inputs.environment || 'dev' }}.tfvars" -out=tfplan
 
       - name: Archive Terraform plan
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: terraform-plan
           path: terraform/tfplan
