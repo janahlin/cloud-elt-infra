@@ -1,6 +1,6 @@
 # Security and scanning tool constraints
 bc-python-hcl2==0.3.51
-bc-detect-secrets==1.4.13
+bc-detect-secrets==1.5.39
 bc-jsonpath-ng==1.5.9
 checkov==2.3.75
 cloudsplaining==0.7.0
