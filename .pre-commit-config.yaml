@@ -39,13 +39,11 @@ repos:
     rev: v1.77.1
     hooks:
       - id: terraform_fmt
-      # Temporarily disable terraform_validate until module structure is fixed
-      # - id: terraform_validate
-      # Temporarily disable terraform_tflint until .tflint.hcl is properly configured
-      # - id: terraform_tflint
-      #   args:
-      #     - --args=--config=.tflint.hcl
-      #     - --hook-config=--retry-once-with-cleanup=true
+      - id: terraform_validate
+      - id: terraform_tflint
+        args:
+          - --args=--config=.tflint.hcl
+          - --hook-config=--retry-once-with-cleanup=true
 
   - repo: https://github.com/pycqa/flake8
     rev: 6.0.0
