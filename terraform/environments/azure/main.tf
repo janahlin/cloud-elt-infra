@@ -1,7 +1,7 @@
 # Azure environment main configuration
 
 module "common" {
-  source      = "../common"
+  source      = "../../modules/common"
   environment = var.environment
 }
 
