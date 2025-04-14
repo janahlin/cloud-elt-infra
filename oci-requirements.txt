@@ -27,7 +27,7 @@ packaging>=23.2
 resolvelib>=1.0.1
 
 # Additional dependencies
-bc-detect-secrets==1.4.13
+bc-detect-secrets==1.5.41
 bc-jsonpath-ng==1.5.9
 bc-python-hcl2==0.3.51
 bcrypt==4.3.0
